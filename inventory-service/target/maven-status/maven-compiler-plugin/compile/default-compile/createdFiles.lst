@@ -1,0 +1,14 @@
+com\eshoppingzone\inventory\entity\InventoryHistory$InventoryHistoryBuilder.class
+com\eshoppingzone\inventory\config\RabbitMQConfig.class
+com\eshoppingzone\inventory\entity\InventoryHistory.class
+com\eshoppingzone\inventory\service\InventoryService.class
+com\eshoppingzone\inventory\repository\InventoryRepository.class
+com\eshoppingzone\inventory\InventoryServiceApplication.class
+com\eshoppingzone\inventory\entity\Inventory$InventoryBuilder.class
+com\eshoppingzone\inventory\service\impl\InventoryServiceImpl.class
+com\eshoppingzone\inventory\config\SecurityConfig.class
+com\eshoppingzone\inventory\repository\InventoryHistoryRepository.class
+com\eshoppingzone\inventory\config\OpenApiConfig.class
+com\eshoppingzone\inventory\controller\InventoryController.class
+com\eshoppingzone\inventory\event\InventoryEventPublisher.class
+com\eshoppingzone\inventory\entity\Inventory.class

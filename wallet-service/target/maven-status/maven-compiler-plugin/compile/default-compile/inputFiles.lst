@@ -1,0 +1,12 @@
+D:\Sprint\sprint project\wallet-service\src\main\java\com\eshoppingzone\wallet\config\OpenApiConfig.java
+D:\Sprint\sprint project\wallet-service\src\main\java\com\eshoppingzone\wallet\config\RabbitMQConfig.java
+D:\Sprint\sprint project\wallet-service\src\main\java\com\eshoppingzone\wallet\config\SecurityConfig.java
+D:\Sprint\sprint project\wallet-service\src\main\java\com\eshoppingzone\wallet\controller\WalletController.java
+D:\Sprint\sprint project\wallet-service\src\main\java\com\eshoppingzone\wallet\entity\Wallet.java
+D:\Sprint\sprint project\wallet-service\src\main\java\com\eshoppingzone\wallet\entity\WalletTransaction.java
+D:\Sprint\sprint project\wallet-service\src\main\java\com\eshoppingzone\wallet\event\UserRegisteredConsumer.java
+D:\Sprint\sprint project\wallet-service\src\main\java\com\eshoppingzone\wallet\repository\WalletRepository.java
+D:\Sprint\sprint project\wallet-service\src\main\java\com\eshoppingzone\wallet\repository\WalletTransactionRepository.java
+D:\Sprint\sprint project\wallet-service\src\main\java\com\eshoppingzone\wallet\service\impl\WalletServiceImpl.java
+D:\Sprint\sprint project\wallet-service\src\main\java\com\eshoppingzone\wallet\service\WalletService.java
+D:\Sprint\sprint project\wallet-service\src\main\java\com\eshoppingzone\wallet\WalletServiceApplication.java

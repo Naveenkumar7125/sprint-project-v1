@@ -1,0 +1,12 @@
+D:\Sprint\sprint project\profile-service\src\main\java\com\eshoppingzone\profile\config\OpenApiConfig.java
+D:\Sprint\sprint project\profile-service\src\main\java\com\eshoppingzone\profile\config\RabbitMQConfig.java
+D:\Sprint\sprint project\profile-service\src\main\java\com\eshoppingzone\profile\config\SecurityConfig.java
+D:\Sprint\sprint project\profile-service\src\main\java\com\eshoppingzone\profile\controller\ProfileController.java
+D:\Sprint\sprint project\profile-service\src\main\java\com\eshoppingzone\profile\entity\Address.java
+D:\Sprint\sprint project\profile-service\src\main\java\com\eshoppingzone\profile\entity\UserProfile.java
+D:\Sprint\sprint project\profile-service\src\main\java\com\eshoppingzone\profile\event\UserRegisteredConsumer.java
+D:\Sprint\sprint project\profile-service\src\main\java\com\eshoppingzone\profile\ProfileServiceApplication.java
+D:\Sprint\sprint project\profile-service\src\main\java\com\eshoppingzone\profile\repository\AddressRepository.java
+D:\Sprint\sprint project\profile-service\src\main\java\com\eshoppingzone\profile\repository\UserProfileRepository.java
+D:\Sprint\sprint project\profile-service\src\main\java\com\eshoppingzone\profile\service\impl\ProfileServiceImpl.java
+D:\Sprint\sprint project\profile-service\src\main\java\com\eshoppingzone\profile\service\ProfileService.java

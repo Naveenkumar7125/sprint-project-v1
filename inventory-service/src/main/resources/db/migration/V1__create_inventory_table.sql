@@ -1,0 +1,12 @@
+CREATE TABLE IF NOT EXISTS inventory (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    product_id BIGINT NOT NULL UNIQUE,
+    available_stock INT NOT NULL DEFAULT 0,
+    reserved_stock INT NOT NULL DEFAULT 0,
+    sold_stock INT NOT NULL DEFAULT 0,
+    low_stock_threshold INT NOT NULL DEFAULT 5,
+    version BIGINT NOT NULL DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_inv_product_id (product_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

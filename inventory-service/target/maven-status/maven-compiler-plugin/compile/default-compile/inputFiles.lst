@@ -1,0 +1,12 @@
+D:\Sprint\sprint project\inventory-service\src\main\java\com\eshoppingzone\inventory\config\OpenApiConfig.java
+D:\Sprint\sprint project\inventory-service\src\main\java\com\eshoppingzone\inventory\config\RabbitMQConfig.java
+D:\Sprint\sprint project\inventory-service\src\main\java\com\eshoppingzone\inventory\config\SecurityConfig.java
+D:\Sprint\sprint project\inventory-service\src\main\java\com\eshoppingzone\inventory\controller\InventoryController.java
+D:\Sprint\sprint project\inventory-service\src\main\java\com\eshoppingzone\inventory\entity\Inventory.java
+D:\Sprint\sprint project\inventory-service\src\main\java\com\eshoppingzone\inventory\entity\InventoryHistory.java
+D:\Sprint\sprint project\inventory-service\src\main\java\com\eshoppingzone\inventory\event\InventoryEventPublisher.java
+D:\Sprint\sprint project\inventory-service\src\main\java\com\eshoppingzone\inventory\InventoryServiceApplication.java
+D:\Sprint\sprint project\inventory-service\src\main\java\com\eshoppingzone\inventory\repository\InventoryHistoryRepository.java
+D:\Sprint\sprint project\inventory-service\src\main\java\com\eshoppingzone\inventory\repository\InventoryRepository.java
+D:\Sprint\sprint project\inventory-service\src\main\java\com\eshoppingzone\inventory\service\impl\InventoryServiceImpl.java
+D:\Sprint\sprint project\inventory-service\src\main\java\com\eshoppingzone\inventory\service\InventoryService.java

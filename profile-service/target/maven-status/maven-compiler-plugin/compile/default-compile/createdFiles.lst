@@ -1,0 +1,14 @@
+com\eshoppingzone\profile\config\OpenApiConfig.class
+com\eshoppingzone\profile\entity\UserProfile$UserProfileBuilder.class
+com\eshoppingzone\profile\entity\Address$AddressBuilder.class
+com\eshoppingzone\profile\repository\UserProfileRepository.class
+com\eshoppingzone\profile\service\ProfileService.class
+com\eshoppingzone\profile\config\SecurityConfig.class
+com\eshoppingzone\profile\event\UserRegisteredConsumer.class
+com\eshoppingzone\profile\entity\UserProfile.class
+com\eshoppingzone\profile\ProfileServiceApplication.class
+com\eshoppingzone\profile\controller\ProfileController.class
+com\eshoppingzone\profile\repository\AddressRepository.class
+com\eshoppingzone\profile\config\RabbitMQConfig.class
+com\eshoppingzone\profile\entity\Address.class
+com\eshoppingzone\profile\service\impl\ProfileServiceImpl.class

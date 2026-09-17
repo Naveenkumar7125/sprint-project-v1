@@ -1,0 +1,11 @@
+com\eshoppingzone\review\entity\Review$ReviewBuilder.class
+com\eshoppingzone\review\config\OpenApiConfig.class
+com\eshoppingzone\review\client\OrderClientFallback.class
+com\eshoppingzone\review\config\SecurityConfig.class
+com\eshoppingzone\review\client\OrderClient.class
+com\eshoppingzone\review\entity\Review.class
+com\eshoppingzone\review\controller\ReviewController.class
+com\eshoppingzone\review\repository\ReviewRepository.class
+com\eshoppingzone\review\service\impl\ReviewServiceImpl.class
+com\eshoppingzone\review\service\ReviewService.class
+com\eshoppingzone\review\ReviewServiceApplication.class

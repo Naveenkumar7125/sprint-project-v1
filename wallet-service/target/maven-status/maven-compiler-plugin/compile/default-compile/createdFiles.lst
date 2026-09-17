@@ -1,0 +1,14 @@
+com\eshoppingzone\wallet\event\UserRegisteredConsumer.class
+com\eshoppingzone\wallet\entity\WalletTransaction.class
+com\eshoppingzone\wallet\repository\WalletTransactionRepository.class
+com\eshoppingzone\wallet\service\WalletService.class
+com\eshoppingzone\wallet\entity\WalletTransaction$WalletTransactionBuilder.class
+com\eshoppingzone\wallet\entity\Wallet$WalletBuilder.class
+com\eshoppingzone\wallet\config\OpenApiConfig.class
+com\eshoppingzone\wallet\WalletServiceApplication.class
+com\eshoppingzone\wallet\config\RabbitMQConfig.class
+com\eshoppingzone\wallet\config\SecurityConfig.class
+com\eshoppingzone\wallet\controller\WalletController.class
+com\eshoppingzone\wallet\entity\Wallet.class
+com\eshoppingzone\wallet\repository\WalletRepository.class
+com\eshoppingzone\wallet\service\impl\WalletServiceImpl.class

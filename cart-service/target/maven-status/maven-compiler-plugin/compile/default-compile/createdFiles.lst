@@ -1,0 +1,14 @@
+com\eshoppingzone\cart\client\ProductClient.class
+com\eshoppingzone\cart\repository\CartItemRepository.class
+com\eshoppingzone\cart\client\ProductClientFallback.class
+com\eshoppingzone\cart\entity\CartItem.class
+com\eshoppingzone\cart\entity\CartItem$CartItemBuilder.class
+com\eshoppingzone\cart\repository\CartRepository.class
+com\eshoppingzone\cart\service\CartService.class
+com\eshoppingzone\cart\CartServiceApplication.class
+com\eshoppingzone\cart\config\SecurityConfig.class
+com\eshoppingzone\cart\config\OpenApiConfig.class
+com\eshoppingzone\cart\controller\CartController.class
+com\eshoppingzone\cart\entity\Cart$CartBuilder.class
+com\eshoppingzone\cart\entity\Cart.class
+com\eshoppingzone\cart\service\impl\CartServiceImpl.class

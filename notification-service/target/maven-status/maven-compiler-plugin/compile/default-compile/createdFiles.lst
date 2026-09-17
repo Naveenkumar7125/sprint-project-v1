@@ -1,0 +1,16 @@
+com\eshoppingzone\notification\dto\NotificationDto$NotificationDtoBuilder.class
+com\eshoppingzone\notification\service\EmailService.class
+com\eshoppingzone\notification\dto\SendNotificationRequest$SendNotificationRequestBuilder.class
+com\eshoppingzone\notification\config\SecurityConfig.class
+com\eshoppingzone\notification\service\NotificationService.class
+com\eshoppingzone\notification\dto\NotificationDto.class
+com\eshoppingzone\notification\service\impl\NotificationServiceImpl.class
+com\eshoppingzone\notification\repository\NotificationRepository.class
+com\eshoppingzone\notification\config\OpenApiConfig.class
+com\eshoppingzone\notification\dto\SendNotificationRequest.class
+com\eshoppingzone\notification\entity\Notification.class
+com\eshoppingzone\notification\config\RabbitMQConfig.class
+com\eshoppingzone\notification\NotificationServiceApplication.class
+com\eshoppingzone\notification\consumer\NotificationConsumer.class
+com\eshoppingzone\notification\controller\NotificationController.class
+com\eshoppingzone\notification\entity\Notification$NotificationBuilder.class

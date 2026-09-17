@@ -1,0 +1,12 @@
+com\eshoppingzone\product\repository\CategoryRepository.class
+com\eshoppingzone\product\config\OpenApiConfig.class
+com\eshoppingzone\product\entity\Product$ProductBuilder.class
+com\eshoppingzone\product\entity\Category.class
+com\eshoppingzone\product\controller\ProductController.class
+com\eshoppingzone\product\entity\Product.class
+com\eshoppingzone\product\service\impl\ProductServiceImpl.class
+com\eshoppingzone\product\ProductServiceApplication.class
+com\eshoppingzone\product\service\ProductService.class
+com\eshoppingzone\product\config\SecurityConfig.class
+com\eshoppingzone\product\entity\Category$CategoryBuilder.class
+com\eshoppingzone\product\repository\ProductRepository.class
