@@ -23,6 +23,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.eshoppingzone.common.event.ProductSearchedEvent;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.factory.annotation.Value;
+
+import java.time.Instant;
+import java.util.UUID;
+
 @Service
 @Transactional
 public class ProductServiceImpl implements ProductService {
@@ -31,10 +38,21 @@ public class ProductServiceImpl implements ProductService {
 
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
+    private final RabbitTemplate rabbitTemplate;
+
+    @Value("${app.rabbitmq.exchange:eshoppingzone.exchange}")
+    private String exchange;
 
     public ProductServiceImpl(ProductRepository productRepository, CategoryRepository categoryRepository) {
+        this(productRepository, categoryRepository, null);
+    }
+
+    public ProductServiceImpl(ProductRepository productRepository, 
+                              CategoryRepository categoryRepository,
+                              RabbitTemplate rabbitTemplate) {
         this.productRepository = productRepository;
         this.categoryRepository = categoryRepository;
+        this.rabbitTemplate = rabbitTemplate;
     }
 
     @Override
@@ -54,7 +72,25 @@ public class ProductServiceImpl implements ProductService {
     @Override
     @Transactional(readOnly = true)
     public Page<ProductDto> searchProducts(String query, Pageable pageable) {
-        return productRepository.searchProducts(query, pageable).map(this::mapToProductDto);
+        Page<ProductDto> result = productRepository.searchProducts(query, pageable).map(this::mapToProductDto);
+        if (rabbitTemplate != null) {
+            try {
+                List<Long> matchedIds = result.getContent().stream().map(ProductDto::getId).collect(Collectors.toList());
+                ProductSearchedEvent event = ProductSearchedEvent.builder()
+                        .eventId(UUID.randomUUID().toString())
+                        .eventType("PRODUCT_SEARCHED")
+                        .timestamp(Instant.now())
+                        .query(query)
+                        .matchedProductIds(matchedIds)
+                        .resultCount(result.getNumberOfElements())
+                        .build();
+                rabbitTemplate.convertAndSend(exchange, "product.searched", event);
+                log.debug("Published ProductSearchedEvent for query: '{}' with {} matches", query, matchedIds.size());
+            } catch (Exception e) {
+                log.warn("Could not publish ProductSearchedEvent: {}", e.getMessage());
+            }
+        }
+        return result;
     }
 
     @Override

@@ -1,4 +1,5 @@
 D:\Sprint\sprint project\product-service\src\main\java\com\eshoppingzone\product\config\OpenApiConfig.java
+D:\Sprint\sprint project\product-service\src\main\java\com\eshoppingzone\product\config\RabbitMQConfig.java
 D:\Sprint\sprint project\product-service\src\main\java\com\eshoppingzone\product\config\SecurityConfig.java
 D:\Sprint\sprint project\product-service\src\main\java\com\eshoppingzone\product\controller\ProductController.java
 D:\Sprint\sprint project\product-service\src\main\java\com\eshoppingzone\product\entity\Category.java

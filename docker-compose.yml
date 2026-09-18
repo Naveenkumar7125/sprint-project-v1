@@ -1,34 +1,11 @@
-version: '3.8'
-
 networks:
   eshoppingzone-network:
     driver: bridge
 
 volumes:
-  mysql-data:
   rabbitmq-data:
 
 services:
-  mysql:
-    image: mysql:8.0.33
-    container_name: eshoppingzone-mysql
-    restart: always
-    environment:
-      MYSQL_ROOT_PASSWORD: root
-    ports:
-      - "3307:3306"
-    volumes:
-      - mysql-data:/var/lib/mysql
-      - ./mysql-init:/docker-entrypoint-initdb.d
-    networks:
-      - eshoppingzone-network
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot"]
-      interval: 5s
-      timeout: 5s
-      retries: 20
-      start_period: 30s
-
   rabbitmq:
     image: rabbitmq:3.13-management-alpine
     container_name: eshoppingzone-rabbitmq
@@ -107,16 +84,17 @@ services:
     restart: always
     ports:
       - "8086:8086"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     environment:
       SPRING_CONFIG_IMPORT: optional:configserver:http://config-server:8888/
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/auth_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      SPRING_DATASOURCE_URL: jdbc:mysql://host.docker.internal:3306/auth_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: root
+      SPRING_FLYWAY_VALIDATE_ON_MIGRATE: "false"
       SPRING_RABBITMQ_HOST: rabbitmq
       EUREKA_SERVER_URL: http://eureka-server:8761/eureka/
     depends_on:
-      mysql:
-        condition: service_healthy
       rabbitmq:
         condition: service_healthy
       config-server:
@@ -133,16 +111,17 @@ services:
     restart: always
     ports:
       - "8081:8081"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     environment:
       SPRING_CONFIG_IMPORT: optional:configserver:http://config-server:8888/
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/profile_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      SPRING_DATASOURCE_URL: jdbc:mysql://host.docker.internal:3306/profile_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: root
+      SPRING_FLYWAY_VALIDATE_ON_MIGRATE: "false"
       SPRING_RABBITMQ_HOST: rabbitmq
       EUREKA_SERVER_URL: http://eureka-server:8761/eureka/
     depends_on:
-      mysql:
-        condition: service_healthy
       config-server:
         condition: service_started
       eureka-server:
@@ -157,16 +136,17 @@ services:
     restart: always
     ports:
       - "8082:8082"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     environment:
       SPRING_CONFIG_IMPORT: optional:configserver:http://config-server:8888/
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/product_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      SPRING_DATASOURCE_URL: jdbc:mysql://host.docker.internal:3306/product_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: root
+      SPRING_FLYWAY_VALIDATE_ON_MIGRATE: "false"
       SPRING_RABBITMQ_HOST: rabbitmq
       EUREKA_SERVER_URL: http://eureka-server:8761/eureka/
     depends_on:
-      mysql:
-        condition: service_healthy
       config-server:
         condition: service_started
       eureka-server:
@@ -181,16 +161,17 @@ services:
     restart: always
     ports:
       - "8088:8088"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     environment:
       SPRING_CONFIG_IMPORT: optional:configserver:http://config-server:8888/
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/inventory_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      SPRING_DATASOURCE_URL: jdbc:mysql://host.docker.internal:3306/inventory_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: root
+      SPRING_FLYWAY_VALIDATE_ON_MIGRATE: "false"
       SPRING_RABBITMQ_HOST: rabbitmq
       EUREKA_SERVER_URL: http://eureka-server:8761/eureka/
     depends_on:
-      mysql:
-        condition: service_healthy
       rabbitmq:
         condition: service_healthy
       config-server:
@@ -207,15 +188,16 @@ services:
     restart: always
     ports:
       - "8083:8083"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     environment:
       SPRING_CONFIG_IMPORT: optional:configserver:http://config-server:8888/
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/cart_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      SPRING_DATASOURCE_URL: jdbc:mysql://host.docker.internal:3306/cart_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: root
+      SPRING_FLYWAY_VALIDATE_ON_MIGRATE: "false"
       EUREKA_SERVER_URL: http://eureka-server:8761/eureka/
     depends_on:
-      mysql:
-        condition: service_healthy
       config-server:
         condition: service_started
       eureka-server:
@@ -230,16 +212,17 @@ services:
     restart: always
     ports:
       - "8084:8084"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     environment:
       SPRING_CONFIG_IMPORT: optional:configserver:http://config-server:8888/
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/order_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      SPRING_DATASOURCE_URL: jdbc:mysql://host.docker.internal:3306/order_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: root
+      SPRING_FLYWAY_VALIDATE_ON_MIGRATE: "false"
       SPRING_RABBITMQ_HOST: rabbitmq
       EUREKA_SERVER_URL: http://eureka-server:8761/eureka/
     depends_on:
-      mysql:
-        condition: service_healthy
       rabbitmq:
         condition: service_healthy
       config-server:
@@ -256,16 +239,17 @@ services:
     restart: always
     ports:
       - "8085:8085"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     environment:
       SPRING_CONFIG_IMPORT: optional:configserver:http://config-server:8888/
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/wallet_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      SPRING_DATASOURCE_URL: jdbc:mysql://host.docker.internal:3306/wallet_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: root
+      SPRING_FLYWAY_VALIDATE_ON_MIGRATE: "false"
       SPRING_RABBITMQ_HOST: rabbitmq
       EUREKA_SERVER_URL: http://eureka-server:8761/eureka/
     depends_on:
-      mysql:
-        condition: service_healthy
       config-server:
         condition: service_started
       eureka-server:
@@ -280,16 +264,17 @@ services:
     restart: always
     ports:
       - "8087:8087"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     environment:
       SPRING_CONFIG_IMPORT: optional:configserver:http://config-server:8888/
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/payment_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      SPRING_DATASOURCE_URL: jdbc:mysql://host.docker.internal:3306/payment_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: root
+      SPRING_FLYWAY_VALIDATE_ON_MIGRATE: "false"
       SPRING_RABBITMQ_HOST: rabbitmq
       EUREKA_SERVER_URL: http://eureka-server:8761/eureka/
     depends_on:
-      mysql:
-        condition: service_healthy
       rabbitmq:
         condition: service_healthy
       config-server:
@@ -306,16 +291,17 @@ services:
     restart: always
     ports:
       - "8089:8089"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     environment:
       SPRING_CONFIG_IMPORT: optional:configserver:http://config-server:8888/
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/delivery_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      SPRING_DATASOURCE_URL: jdbc:mysql://host.docker.internal:3306/delivery_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: root
+      SPRING_FLYWAY_VALIDATE_ON_MIGRATE: "false"
       SPRING_RABBITMQ_HOST: rabbitmq
       EUREKA_SERVER_URL: http://eureka-server:8761/eureka/
     depends_on:
-      mysql:
-        condition: service_healthy
       rabbitmq:
         condition: service_healthy
       config-server:
@@ -332,18 +318,19 @@ services:
     restart: always
     ports:
       - "8090:8090"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     environment:
       SPRING_CONFIG_IMPORT: optional:configserver:http://config-server:8888/
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/notification_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      SPRING_DATASOURCE_URL: jdbc:mysql://host.docker.internal:3306/notification_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: root
+      SPRING_FLYWAY_VALIDATE_ON_MIGRATE: "false"
       SPRING_RABBITMQ_HOST: rabbitmq
       SPRING_MAIL_HOST: mailhog
       SPRING_MAIL_PORT: 1025
       EUREKA_SERVER_URL: http://eureka-server:8761/eureka/
     depends_on:
-      mysql:
-        condition: service_healthy
       rabbitmq:
         condition: service_healthy
       config-server:
@@ -360,14 +347,42 @@ services:
     restart: always
     ports:
       - "8091:8091"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     environment:
       SPRING_CONFIG_IMPORT: optional:configserver:http://config-server:8888/
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/review_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      SPRING_DATASOURCE_URL: jdbc:mysql://host.docker.internal:3306/review_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: root
+      SPRING_FLYWAY_VALIDATE_ON_MIGRATE: "false"
       EUREKA_SERVER_URL: http://eureka-server:8761/eureka/
     depends_on:
-      mysql:
+      config-server:
+        condition: service_started
+      eureka-server:
+        condition: service_started
+    networks:
+      - eshoppingzone-network
+
+  recommendation-service:
+    build:
+      context: ./recommendation-service
+    container_name: eshoppingzone-recommendation-service
+    restart: always
+    ports:
+      - "8092:8092"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      SPRING_CONFIG_IMPORT: optional:configserver:http://config-server:8888/
+      SPRING_DATASOURCE_URL: jdbc:mysql://host.docker.internal:3306/recommendation_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+      SPRING_FLYWAY_VALIDATE_ON_MIGRATE: "false"
+      SPRING_RABBITMQ_HOST: rabbitmq
+      EUREKA_SERVER_URL: http://eureka-server:8761/eureka/
+    depends_on:
+      rabbitmq:
         condition: service_healthy
       config-server:
         condition: service_started
@@ -375,3 +390,31 @@ services:
         condition: service_started
     networks:
       - eshoppingzone-network
+
+  shipping-service:
+    build:
+      context: ./shipping-service
+    container_name: eshoppingzone-shipping-service
+    restart: always
+    ports:
+      - "8093:8093"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      SPRING_CONFIG_IMPORT: optional:configserver:http://config-server:8888/
+      SPRING_DATASOURCE_URL: jdbc:mysql://host.docker.internal:3306/shipping_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+      SPRING_FLYWAY_VALIDATE_ON_MIGRATE: "false"
+      SPRING_RABBITMQ_HOST: rabbitmq
+      EUREKA_SERVER_URL: http://eureka-server:8761/eureka/
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      config-server:
+        condition: service_started
+      eureka-server:
+        condition: service_started
+    networks:
+      - eshoppingzone-network
+

@@ -5,6 +5,7 @@ com\eshoppingzone\product\entity\Category.class
 com\eshoppingzone\product\controller\ProductController.class
 com\eshoppingzone\product\entity\Product.class
 com\eshoppingzone\product\service\impl\ProductServiceImpl.class
+com\eshoppingzone\product\config\RabbitMQConfig.class
 com\eshoppingzone\product\ProductServiceApplication.class
 com\eshoppingzone\product\service\ProductService.class
 com\eshoppingzone\product\config\SecurityConfig.class
