@@ -35,7 +35,7 @@ public class RabbitMQConfig {
 
     @Bean
     public Binding userRegisteredBinding(Queue userRegisteredQueue, TopicExchange notificationExchange) {
-        return BindingBuilder.bind(userRegisteredQueue).to(notificationExchange).with("user.registered");
+        return BindingBuilder.bind(userRegisteredQueue).to(notificationExchange).with("auth.user.registered");
     }
 
     @Bean
@@ -45,7 +45,7 @@ public class RabbitMQConfig {
 
     @Bean
     public Binding passwordResetBinding(Queue passwordResetQueue, TopicExchange notificationExchange) {
-        return BindingBuilder.bind(passwordResetQueue).to(notificationExchange).with("password.reset.*");
+        return BindingBuilder.bind(passwordResetQueue).to(notificationExchange).with("auth.password.reset.#");
     }
 
     @Bean
@@ -55,7 +55,7 @@ public class RabbitMQConfig {
 
     @Bean
     public Binding orderBinding(Queue orderQueue, TopicExchange notificationExchange) {
-        return BindingBuilder.bind(orderQueue).to(notificationExchange).with("order.*");
+        return BindingBuilder.bind(orderQueue).to(notificationExchange).with("order.#");
     }
 
     @Bean
@@ -65,7 +65,7 @@ public class RabbitMQConfig {
 
     @Bean
     public Binding paymentBinding(Queue paymentQueue, TopicExchange notificationExchange) {
-        return BindingBuilder.bind(paymentQueue).to(notificationExchange).with("payment.*");
+        return BindingBuilder.bind(paymentQueue).to(notificationExchange).with("payment.success");
     }
 
     @Bean
@@ -75,7 +75,7 @@ public class RabbitMQConfig {
 
     @Bean
     public Binding refundBinding(Queue refundQueue, TopicExchange notificationExchange) {
-        return BindingBuilder.bind(refundQueue).to(notificationExchange).with("refund.*");
+        return BindingBuilder.bind(refundQueue).to(notificationExchange).with("payment.refund.#");
     }
 
     @Bean
@@ -85,7 +85,7 @@ public class RabbitMQConfig {
 
     @Bean
     public Binding deliveryBinding(Queue deliveryQueue, TopicExchange notificationExchange) {
-        return BindingBuilder.bind(deliveryQueue).to(notificationExchange).with("delivery.status.changed");
+        return BindingBuilder.bind(deliveryQueue).to(notificationExchange).with("delivery.status.#");
     }
 
     @Bean
@@ -95,7 +95,7 @@ public class RabbitMQConfig {
 
     @Bean
     public Binding inventoryBinding(Queue inventoryQueue, TopicExchange notificationExchange) {
-        return BindingBuilder.bind(inventoryQueue).to(notificationExchange).with("inventory.low-stock");
+        return BindingBuilder.bind(inventoryQueue).to(notificationExchange).with("inventory.low.#");
     }
 
     @Bean

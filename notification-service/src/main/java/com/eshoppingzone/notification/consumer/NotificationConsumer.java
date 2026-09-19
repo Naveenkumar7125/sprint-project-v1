@@ -30,7 +30,9 @@ public class NotificationConsumer {
     public void handlePasswordResetRequested(PasswordResetRequestedEvent event) {
         log.info("Processing PasswordResetRequestedEvent for email: {}", event.getEmail());
         String subject = "Password Reset Request - EShopping Zone";
-        String content = String.format("Hello,\n\nA password reset was requested for your account. Please use the following token or link:\nToken: %s\n\nThis token will expire in 15 minutes. If you did not request this, please ignore.",
+        String content = String.format("Hello %s,\n\nA password reset was requested for your account.\n\nReset Link: %s\nReset Token: %s\n\nThis token will expire in 15 minutes. If you did not request this, please ignore.",
+                event.getUsername() != null ? event.getUsername() : "Customer",
+                event.getResetUrl() != null ? event.getResetUrl() : "N/A",
                 event.getResetToken());
 
         notificationService.createAndSend(event.getEmail(), event.getUserId(), subject, content, NotificationChannel.EMAIL, "PASSWORD_RESET_REQUEST");

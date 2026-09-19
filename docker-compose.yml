@@ -327,8 +327,12 @@ services:
       SPRING_DATASOURCE_PASSWORD: root
       SPRING_FLYWAY_VALIDATE_ON_MIGRATE: "false"
       SPRING_RABBITMQ_HOST: rabbitmq
-      SPRING_MAIL_HOST: mailhog
-      SPRING_MAIL_PORT: 1025
+      SPRING_MAIL_HOST: smtp.gmail.com
+      SPRING_MAIL_PORT: 587
+      SPRING_MAIL_USERNAME: eshoppingzone.notifications@gmail.com
+      SPRING_MAIL_PASSWORD: nnwungywcyfbmkkm
+      SPRING_MAIL_SMTP_AUTH: "true"
+      SPRING_MAIL_SMTP_STARTTLS: "true"
       EUREKA_SERVER_URL: http://eureka-server:8761/eureka/
     depends_on:
       rabbitmq:
@@ -376,33 +380,6 @@ services:
     environment:
       SPRING_CONFIG_IMPORT: optional:configserver:http://config-server:8888/
       SPRING_DATASOURCE_URL: jdbc:mysql://host.docker.internal:3306/recommendation_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
-      SPRING_DATASOURCE_USERNAME: root
-      SPRING_DATASOURCE_PASSWORD: root
-      SPRING_FLYWAY_VALIDATE_ON_MIGRATE: "false"
-      SPRING_RABBITMQ_HOST: rabbitmq
-      EUREKA_SERVER_URL: http://eureka-server:8761/eureka/
-    depends_on:
-      rabbitmq:
-        condition: service_healthy
-      config-server:
-        condition: service_started
-      eureka-server:
-        condition: service_started
-    networks:
-      - eshoppingzone-network
-
-  shipping-service:
-    build:
-      context: ./shipping-service
-    container_name: eshoppingzone-shipping-service
-    restart: always
-    ports:
-      - "8093:8093"
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
-    environment:
-      SPRING_CONFIG_IMPORT: optional:configserver:http://config-server:8888/
-      SPRING_DATASOURCE_URL: jdbc:mysql://host.docker.internal:3306/shipping_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: root
       SPRING_FLYWAY_VALIDATE_ON_MIGRATE: "false"

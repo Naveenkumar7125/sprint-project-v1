@@ -1,5 +1,6 @@
 D:\Sprint\sprint project\recommendation-service\src\main\java\com\eshoppingzone\recommendation\client\ProductClient.java
 D:\Sprint\sprint project\recommendation-service\src\main\java\com\eshoppingzone\recommendation\client\ReviewClient.java
+D:\Sprint\sprint project\recommendation-service\src\main\java\com\eshoppingzone\recommendation\config\OpenApiConfig.java
 D:\Sprint\sprint project\recommendation-service\src\main\java\com\eshoppingzone\recommendation\config\RabbitMQConfig.java
 D:\Sprint\sprint project\recommendation-service\src\main\java\com\eshoppingzone\recommendation\config\SecurityConfig.java
 D:\Sprint\sprint project\recommendation-service\src\main\java\com\eshoppingzone\recommendation\consumer\OrderConfirmedConsumer.java

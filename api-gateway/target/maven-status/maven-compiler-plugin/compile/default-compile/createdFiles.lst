@@ -1,2 +1,3 @@
 com\eshoppingzone\gateway\ApiGatewayApplication.class
 com\eshoppingzone\gateway\filter\LoggingAndCorrelationFilter.class
+com\eshoppingzone\gateway\config\SwaggerRedirectConfig.class

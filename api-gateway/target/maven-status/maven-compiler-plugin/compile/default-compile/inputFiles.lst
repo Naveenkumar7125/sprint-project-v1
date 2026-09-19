@@ -1,2 +1,3 @@
 D:\Sprint\sprint project\api-gateway\src\main\java\com\eshoppingzone\gateway\ApiGatewayApplication.java
+D:\Sprint\sprint project\api-gateway\src\main\java\com\eshoppingzone\gateway\config\SwaggerRedirectConfig.java
 D:\Sprint\sprint project\api-gateway\src\main\java\com\eshoppingzone\gateway\filter\LoggingAndCorrelationFilter.java

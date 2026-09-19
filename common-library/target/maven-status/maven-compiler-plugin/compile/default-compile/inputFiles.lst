@@ -45,11 +45,6 @@ D:\Sprint\sprint project\common-library\src\main\java\com\eshoppingzone\common\d
 D:\Sprint\sprint project\common-library\src\main\java\com\eshoppingzone\common\dto\review\ReviewCreateRequest.java
 D:\Sprint\sprint project\common-library\src\main\java\com\eshoppingzone\common\dto\review\ReviewDto.java
 D:\Sprint\sprint project\common-library\src\main\java\com\eshoppingzone\common\dto\review\ReviewUpdateRequest.java
-D:\Sprint\sprint project\common-library\src\main\java\com\eshoppingzone\common\dto\shipping\ManualShipRequest.java
-D:\Sprint\sprint project\common-library\src\main\java\com\eshoppingzone\common\dto\shipping\OrderTrackingDto.java
-D:\Sprint\sprint project\common-library\src\main\java\com\eshoppingzone\common\dto\shipping\ShipmentDto.java
-D:\Sprint\sprint project\common-library\src\main\java\com\eshoppingzone\common\dto\shipping\ShipmentEventDto.java
-D:\Sprint\sprint project\common-library\src\main\java\com\eshoppingzone\common\dto\shipping\ShippingWebhookPayload.java
 D:\Sprint\sprint project\common-library\src\main\java\com\eshoppingzone\common\dto\wallet\InternalWalletTransferRequest.java
 D:\Sprint\sprint project\common-library\src\main\java\com\eshoppingzone\common\dto\wallet\InternalWalletTransferResponse.java
 D:\Sprint\sprint project\common-library\src\main\java\com\eshoppingzone\common\dto\wallet\WalletDto.java

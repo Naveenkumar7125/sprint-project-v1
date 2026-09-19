@@ -14,7 +14,7 @@ public class EmailService {
 
     private final JavaMailSender mailSender;
 
-    @Value("${spring.mail.username:noreply@eshoppingzone.com}")
+    @Value("${spring.mail.username:eshoppingzone.notifications@gmail.com}")
     private String fromEmail;
 
     @Value("${app.mail.enabled:false}")
@@ -24,8 +24,8 @@ public class EmailService {
         log.info("Preparing to send email to: [{}], Subject: [{}]", to, subject);
 
         if (!mailEnabled) {
-            log.info("Email sending simulated (app.mail.enabled=false). Body preview: {}",
-                    content.length() > 100 ? content.substring(0, 100) + "..." : content);
+            log.info("\n================ [EMAIL SIMULATION] ================\nTo: {}\nSubject: {}\nContent:\n{}\n====================================================",
+                    to, subject, content);
             return;
         }
 

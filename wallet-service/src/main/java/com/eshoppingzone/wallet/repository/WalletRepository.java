@@ -17,6 +17,6 @@ public interface WalletRepository extends JpaRepository<Wallet, Long> {
 
     List<Wallet> findByRole(UserRole role);
 
-    @Query("SELECT w FROM Wallet w WHERE w.role = 'ADMIN' ORDER BY w.id ASC")
+    @Query("SELECT w FROM Wallet w WHERE w.role = 'ADMIN' ORDER BY CASE WHEN w.userId > 0 THEN 0 ELSE 1 END, w.id ASC")
     List<Wallet> findAdminWallets();
 }

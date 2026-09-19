@@ -285,15 +285,18 @@ public class WalletServiceImpl implements WalletService {
             return admins.get(0);
         }
 
-        // Provision default system admin wallet (userId: 1)
-        Wallet adminWallet = Wallet.builder()
-                .userId(1L)
-                .role(UserRole.ADMIN)
-                .balance(new BigDecimal("1000000.00")) // Initial balance for admin settlement
-                .currency("INR")
-                .status(WalletStatus.ACTIVE)
-                .build();
-        return walletRepository.save(adminWallet);
+        // Provision reserved platform system admin escrow wallet (userId: 0L)
+        return walletRepository.findByUserId(0L)
+                .orElseGet(() -> {
+                    Wallet adminWallet = Wallet.builder()
+                            .userId(0L)
+                            .role(UserRole.ADMIN)
+                            .balance(new BigDecimal("1000000.00")) // Initial balance for admin settlement
+                            .currency("INR")
+                            .status(WalletStatus.ACTIVE)
+                            .build();
+                    return walletRepository.save(adminWallet);
+                });
     }
 
     private WalletDto mapToDto(Wallet wallet) {

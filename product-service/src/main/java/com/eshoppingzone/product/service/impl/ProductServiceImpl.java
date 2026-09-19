@@ -43,9 +43,9 @@ public class ProductServiceImpl implements ProductService {
     @Value("${app.rabbitmq.exchange:eshoppingzone.exchange}")
     private String exchange;
 
-    public ProductServiceImpl(ProductRepository productRepository, CategoryRepository categoryRepository) {
-        this(productRepository, categoryRepository, null);
-    }
+//    public ProductServiceImpl(ProductRepository productRepository, CategoryRepository categoryRepository) {
+//        this(productRepository, categoryRepository, null);
+//    }
 
     public ProductServiceImpl(ProductRepository productRepository, 
                               CategoryRepository categoryRepository,
