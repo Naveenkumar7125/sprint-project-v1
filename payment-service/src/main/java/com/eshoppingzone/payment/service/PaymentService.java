@@ -1,6 +1,6 @@
 package com.eshoppingzone.payment.service;
 
-import com.eshoppingzone.common.dto.payment.*;
+import com.eshoppingzone.payment.dto.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 

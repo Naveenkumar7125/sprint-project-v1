@@ -1,7 +1,7 @@
 package com.eshoppingzone.cart.client;
 
-import com.eshoppingzone.common.dto.product.ProductDto;
-import com.eshoppingzone.common.exception.ResourceNotFoundException;
+import com.eshoppingzone.cart.dto.ProductDto;
+import com.eshoppingzone.cart.exception.ResourceNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;

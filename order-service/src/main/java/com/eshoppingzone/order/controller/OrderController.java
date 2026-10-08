@@ -1,11 +1,11 @@
 package com.eshoppingzone.order.controller;
 
-import com.eshoppingzone.common.dto.order.OrderCancelRequest;
-import com.eshoppingzone.common.dto.order.OrderCreateRequest;
-import com.eshoppingzone.common.dto.order.OrderDto;
-import com.eshoppingzone.common.enums.OrderStatus;
-import com.eshoppingzone.common.enums.UserRole;
-import com.eshoppingzone.common.security.SecurityUtils;
+import com.eshoppingzone.order.dto.OrderCancelRequest;
+import com.eshoppingzone.order.dto.OrderCreateRequest;
+import com.eshoppingzone.order.dto.OrderDto;
+import com.eshoppingzone.order.enums.OrderStatus;
+import com.eshoppingzone.order.enums.UserRole;
+import com.eshoppingzone.order.security.SecurityUtils;
 import com.eshoppingzone.order.service.OrderService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -87,6 +87,38 @@ public class OrderController {
         Long customerId = SecurityUtils.getCurrentUserId();
         Page<OrderDto> orders = orderService.getCustomerOrders(customerId, pageable);
         return ResponseEntity.ok(orders);
+    }
+
+    @GetMapping("/merchant")
+    @PreAuthorize("hasAnyRole('MERCHANT', 'ADMIN')")
+    @Operation(summary = "Get orders containing items for the authenticated merchant")
+    public ResponseEntity<Page<OrderDto>> getMerchantOrders(
+            @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+        Long merchantId = SecurityUtils.getCurrentUserId();
+        Page<OrderDto> orders = orderService.getMerchantOrders(merchantId, pageable);
+        return ResponseEntity.ok(orders);
+    }
+
+    @PatchMapping("/{id}/merchant-status")
+    @PreAuthorize("hasAnyRole('MERCHANT', 'ADMIN')")
+    @Operation(summary = "Update order status by merchant (PROCESSING, READY_FOR_PICKUP)")
+    public ResponseEntity<OrderDto> updateMerchantOrderStatus(
+            @PathVariable("id") Long id,
+            @Valid @RequestBody com.eshoppingzone.order.dto.MerchantOrderStatusUpdateRequest request) {
+        Long userId = SecurityUtils.getCurrentUserId();
+        UserRole role = SecurityUtils.getCurrentUserRole();
+        OrderDto order = orderService.updateMerchantOrderStatus(id, request.getStatus(), request.getRemarks(), userId, role);
+        return ResponseEntity.ok(order);
+    }
+
+    @GetMapping("/{id}/delivery")
+    @PreAuthorize("isAuthenticated()")
+    @Operation(summary = "Get delivery status tracking for an order")
+    public ResponseEntity<com.eshoppingzone.order.dto.DeliveryDto> getOrderDelivery(@PathVariable("id") Long id) {
+        Long userId = SecurityUtils.getCurrentUserId();
+        UserRole role = SecurityUtils.getCurrentUserRole();
+        com.eshoppingzone.order.dto.DeliveryDto delivery = orderService.getOrderDelivery(id, userId, role);
+        return ResponseEntity.ok(delivery);
     }
 
     @GetMapping

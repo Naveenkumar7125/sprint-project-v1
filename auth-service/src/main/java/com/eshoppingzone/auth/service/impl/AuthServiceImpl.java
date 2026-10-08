@@ -8,17 +8,17 @@ import com.eshoppingzone.auth.repository.PasswordResetTokenRepository;
 import com.eshoppingzone.auth.repository.RefreshTokenRepository;
 import com.eshoppingzone.auth.repository.UserRepository;
 import com.eshoppingzone.auth.service.AuthService;
-import com.eshoppingzone.common.dto.auth.*;
-import com.eshoppingzone.common.enums.AccountStatus;
-import com.eshoppingzone.common.enums.UserRole;
-import com.eshoppingzone.common.event.PasswordResetCompletedEvent;
-import com.eshoppingzone.common.event.PasswordResetRequestedEvent;
-import com.eshoppingzone.common.event.UserRegisteredEvent;
-import com.eshoppingzone.common.exception.BadRequestException;
-import com.eshoppingzone.common.exception.ConflictException;
-import com.eshoppingzone.common.exception.ResourceNotFoundException;
-import com.eshoppingzone.common.exception.UnauthorizedException;
-import com.eshoppingzone.common.security.JwtUtils;
+import com.eshoppingzone.auth.dto.*;
+import com.eshoppingzone.auth.enums.AccountStatus;
+import com.eshoppingzone.auth.enums.UserRole;
+import com.eshoppingzone.auth.event.PasswordResetCompletedEvent;
+import com.eshoppingzone.auth.event.PasswordResetRequestedEvent;
+import com.eshoppingzone.auth.event.UserRegisteredEvent;
+import com.eshoppingzone.auth.exception.BadRequestException;
+import com.eshoppingzone.auth.exception.ConflictException;
+import com.eshoppingzone.auth.exception.ResourceNotFoundException;
+import com.eshoppingzone.auth.exception.UnauthorizedException;
+import com.eshoppingzone.auth.security.JwtUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -34,6 +34,7 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Base64;
 import java.util.HexFormat;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -56,11 +57,11 @@ public class AuthServiceImpl implements AuthService {
     private String resetBaseUrl;
 
     public AuthServiceImpl(UserRepository userRepository,
-                           RefreshTokenRepository refreshTokenRepository,
-                           PasswordResetTokenRepository passwordResetTokenRepository,
-                           PasswordEncoder passwordEncoder,
-                           JwtUtils jwtUtils,
-                           AuthEventPublisher eventPublisher) {
+            RefreshTokenRepository refreshTokenRepository,
+            PasswordResetTokenRepository passwordResetTokenRepository,
+            PasswordEncoder passwordEncoder,
+            JwtUtils jwtUtils,
+            AuthEventPublisher eventPublisher) {
         this.userRepository = userRepository;
         this.refreshTokenRepository = refreshTokenRepository;
         this.passwordResetTokenRepository = passwordResetTokenRepository;
@@ -83,12 +84,15 @@ public class AuthServiceImpl implements AuthService {
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .role(request.getRole())
+                .assignedCategoryId(request.getAssignedCategoryId())
+                .assignedCategoryName(request.getAssignedCategoryName())
                 .enabled(true)
                 .accountStatus(AccountStatus.ACTIVE)
                 .build();
 
         User savedUser = userRepository.save(user);
-        log.info("Registered user id: {}, username: {}, role: {}", savedUser.getId(), savedUser.getUsername(), savedUser.getRole());
+        log.info("Registered user id: {}, username: {}, role: {}, category: {}", savedUser.getId(), savedUser.getUsername(),
+                savedUser.getRole(), savedUser.getAssignedCategoryName());
 
         eventPublisher.publishUserRegistered(UserRegisteredEvent.builder()
                 .userId(savedUser.getId())
@@ -113,7 +117,8 @@ public class AuthServiceImpl implements AuthService {
             throw new UnauthorizedException("Account is deactivated or suspended");
         }
 
-        String accessToken = jwtUtils.generateAccessToken(user.getId(), user.getUsername(), user.getEmail(), user.getRole());
+        String accessToken = jwtUtils.generateAccessToken(user.getId(), user.getUsername(), user.getEmail(),
+                user.getRole());
         String refreshToken = jwtUtils.generateRefreshToken(user.getId(), user.getUsername());
 
         String refreshHash = hashToken(refreshToken);
@@ -136,6 +141,83 @@ public class AuthServiceImpl implements AuthService {
                 .username(user.getUsername())
                 .email(user.getEmail())
                 .role(user.getRole())
+                .assignedCategoryId(user.getAssignedCategoryId())
+                .assignedCategoryName(user.getAssignedCategoryName())
+                .build();
+    }
+
+    @Override
+    public AuthResponse socialLogin(SocialLoginRequest request) {
+        String email = request.getEmail().trim().toLowerCase();
+        Optional<User> existingUser = userRepository.findByEmail(email);
+
+        User user;
+        if (existingUser.isPresent()) {
+            user = existingUser.get();
+            if (!user.isEnabled() || user.getAccountStatus() != AccountStatus.ACTIVE) {
+                user.setEnabled(true);
+                user.setAccountStatus(AccountStatus.ACTIVE);
+                user = userRepository.save(user);
+            }
+            log.info("Social login for existing user: {}", user.getEmail());
+        } else {
+            String baseUsername = (request.getUsername() != null && !request.getUsername().isBlank())
+                    ? request.getUsername().trim()
+                    : email.split("@")[0].replaceAll("[^a-zA-Z0-9_]", "_");
+            if (baseUsername.length() < 3) baseUsername = baseUsername + "_user";
+
+            String uniqueUsername = baseUsername;
+            int counter = 1;
+            while (userRepository.existsByUsername(uniqueUsername)) {
+                uniqueUsername = baseUsername + "_" + counter++;
+            }
+
+            UserRole role = request.getRole() != null ? request.getRole() : UserRole.CUSTOMER;
+            String randomPassword = java.util.UUID.randomUUID().toString();
+
+            user = User.builder()
+                    .username(uniqueUsername)
+                    .email(email)
+                    .password(passwordEncoder.encode(randomPassword))
+                    .role(role)
+                    .enabled(true)
+                    .accountStatus(AccountStatus.ACTIVE)
+                    .build();
+
+            user = userRepository.save(user);
+            log.info("Created new user via social login: id={}, username={}, email={}", user.getId(), user.getUsername(), user.getEmail());
+
+            eventPublisher.publishUserRegistered(UserRegisteredEvent.builder()
+                    .userId(user.getId())
+                    .username(user.getUsername())
+                    .email(user.getEmail())
+                    .role(user.getRole())
+                    .build());
+        }
+
+        String accessToken = jwtUtils.generateAccessToken(user.getId(), user.getUsername(), user.getEmail(), user.getRole());
+        String refreshToken = jwtUtils.generateRefreshToken(user.getId(), user.getUsername());
+
+        String refreshHash = hashToken(refreshToken);
+        RefreshToken rt = RefreshToken.builder()
+                .userId(user.getId())
+                .tokenHash(refreshHash)
+                .expiresAt(Instant.now().plus(7, ChronoUnit.DAYS))
+                .revoked(false)
+                .build();
+        refreshTokenRepository.save(rt);
+
+        return AuthResponse.builder()
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .tokenType("Bearer")
+                .expiresIn(86400L)
+                .userId(user.getId())
+                .username(user.getUsername())
+                .email(user.getEmail())
+                .role(user.getRole())
+                .assignedCategoryId(user.getAssignedCategoryId())
+                .assignedCategoryName(user.getAssignedCategoryName())
                 .build();
     }
 
@@ -165,7 +247,8 @@ public class AuthServiceImpl implements AuthService {
         storedToken.setRevoked(true);
         refreshTokenRepository.save(storedToken);
 
-        String newAccessToken = jwtUtils.generateAccessToken(user.getId(), user.getUsername(), user.getEmail(), user.getRole());
+        String newAccessToken = jwtUtils.generateAccessToken(user.getId(), user.getUsername(), user.getEmail(),
+                user.getRole());
         String newRefreshToken = jwtUtils.generateRefreshToken(user.getId(), user.getUsername());
 
         RefreshToken newRt = RefreshToken.builder()
@@ -185,6 +268,8 @@ public class AuthServiceImpl implements AuthService {
                 .username(user.getUsername())
                 .email(user.getEmail())
                 .role(user.getRole())
+                .assignedCategoryId(user.getAssignedCategoryId())
+                .assignedCategoryName(user.getAssignedCategoryName())
                 .build();
     }
 
@@ -293,6 +378,70 @@ public class AuthServiceImpl implements AuthService {
         return mapToUserDto(user);
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public List<UserDto> getUsersByRole(UserRole role) {
+        return userRepository.findByRoleAndEnabledTrue(role)
+                .stream()
+                .map(this::mapToUserDto)
+                .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<UserDto> getAllUsers() {
+        return userRepository.findAll()
+                .stream()
+                .map(this::mapToUserDto)
+                .toList();
+    }
+
+    @Override
+    public UserDto updateUserRole(Long userId, UserRole role) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
+        user.setRole(role);
+        User saved = userRepository.save(user);
+        log.info("Updated user {} role to {}", userId, role);
+        return mapToUserDto(saved);
+    }
+
+    @Override
+    public UserDto updateUserStatus(Long userId, AccountStatus status, Boolean enabled) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
+        if (status != null) {
+            user.setAccountStatus(status);
+        }
+        if (enabled != null) {
+            user.setEnabled(enabled);
+        }
+        User saved = userRepository.save(user);
+        log.info("Updated user {} status to {} (enabled={})", userId, user.getAccountStatus(), user.isEnabled());
+        return mapToUserDto(saved);
+    }
+
+    @Override
+    public UserDto updateUserCategory(Long userId, Long categoryId, String categoryName) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
+        user.setAssignedCategoryId(categoryId);
+        user.setAssignedCategoryName(categoryName);
+        User saved = userRepository.save(user);
+        log.info("Updated merchant user {} assigned category to {} ({})", userId, categoryName, categoryId);
+        return mapToUserDto(saved);
+    }
+
+    @Override
+    public void deleteUser(Long userId) {
+        if (!userRepository.existsById(userId)) {
+            throw new ResourceNotFoundException("User not found with id: " + userId);
+        }
+        refreshTokenRepository.revokeAllUserTokens(userId);
+        userRepository.deleteById(userId);
+        log.info("Deleted user with id: {}", userId);
+    }
+
     private UserDto mapToUserDto(User user) {
         return UserDto.builder()
                 .id(user.getId())
@@ -301,6 +450,8 @@ public class AuthServiceImpl implements AuthService {
                 .role(user.getRole())
                 .enabled(user.isEnabled())
                 .accountStatus(user.getAccountStatus())
+                .assignedCategoryId(user.getAssignedCategoryId())
+                .assignedCategoryName(user.getAssignedCategoryName())
                 .createdAt(user.getCreatedAt())
                 .updatedAt(user.getUpdatedAt())
                 .build();

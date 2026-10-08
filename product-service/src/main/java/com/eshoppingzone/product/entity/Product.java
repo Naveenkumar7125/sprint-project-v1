@@ -43,7 +43,7 @@ public class Product {
     @Column(nullable = false, precision = 19, scale = 2)
     private BigDecimal price;
 
-    @Column(name = "image_url", length = 500)
+    @Column(name = "image_url", columnDefinition = "LONGTEXT")
     private String imageUrl;
 
     @Column(nullable = false)
@@ -53,7 +53,7 @@ public class Product {
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "product_specifications", joinColumns = @JoinColumn(name = "product_id"))
     @MapKeyColumn(name = "spec_key", length = 100)
-    @Column(name = "spec_value", length = 255)
+    @Column(name = "spec_value", columnDefinition = "LONGTEXT")
     @Builder.Default
     private Map<String, String> specifications = new HashMap<>();
 

@@ -1,7 +1,7 @@
 package com.eshoppingzone.auth.entity;
 
-import com.eshoppingzone.common.enums.AccountStatus;
-import com.eshoppingzone.common.enums.UserRole;
+import com.eshoppingzone.auth.enums.AccountStatus;
+import com.eshoppingzone.auth.enums.UserRole;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -46,6 +46,12 @@ public class User {
     @Column(nullable = false, length = 30)
     @Builder.Default
     private AccountStatus accountStatus = AccountStatus.ACTIVE;
+
+    @Column(name = "assigned_category_id")
+    private Long assignedCategoryId;
+
+    @Column(name = "assigned_category_name", length = 100)
+    private String assignedCategoryName;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)

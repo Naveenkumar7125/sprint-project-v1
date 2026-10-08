@@ -1,13 +1,14 @@
 package com.eshoppingzone.delivery.service;
 
-import com.eshoppingzone.common.dto.delivery.DeliveryAssignmentRequest;
-import com.eshoppingzone.common.dto.delivery.DeliveryCreateRequest;
-import com.eshoppingzone.common.dto.delivery.DeliveryDto;
-import com.eshoppingzone.common.dto.delivery.DeliveryStatusUpdateRequest;
-import com.eshoppingzone.common.enums.DeliveryStatus;
-import com.eshoppingzone.common.enums.UserRole;
-import com.eshoppingzone.common.exception.BadRequestException;
-import com.eshoppingzone.common.exception.ForbiddenException;
+import com.eshoppingzone.delivery.dto.DeliveryAssignmentRequest;
+import com.eshoppingzone.delivery.dto.DeliveryCreateRequest;
+import com.eshoppingzone.delivery.dto.DeliveryDto;
+import com.eshoppingzone.delivery.dto.DeliveryStatusUpdateRequest;
+import com.eshoppingzone.delivery.dto.DeliverySummaryDto;
+import com.eshoppingzone.delivery.enums.DeliveryStatus;
+import com.eshoppingzone.delivery.enums.UserRole;
+import com.eshoppingzone.delivery.exception.BadRequestException;
+import com.eshoppingzone.delivery.exception.ForbiddenException;
 import com.eshoppingzone.delivery.entity.Delivery;
 import com.eshoppingzone.delivery.repository.DeliveryRepository;
 import com.eshoppingzone.delivery.service.impl.DeliveryServiceImpl;
@@ -40,10 +41,12 @@ class DeliveryServiceTest {
     private DeliveryServiceImpl deliveryService;
 
     @Test
-    @DisplayName("Create Delivery - Success")
+    @DisplayName("Create Delivery - Starts as AVAILABLE")
     void testCreateDelivery_Success() {
         DeliveryCreateRequest request = DeliveryCreateRequest.builder()
                 .orderId(100L)
+                .customerId(50L)
+                .merchantId(101L)
                 .shippingAddressSnapshot("123 Main St, Springfield")
                 .customerNotes("Ring bell")
                 .build();
@@ -51,8 +54,10 @@ class DeliveryServiceTest {
         Delivery saved = Delivery.builder()
                 .id(1L)
                 .orderId(100L)
+                .customerId(50L)
+                .merchantId(101L)
                 .trackingNumber("TRK-1234567890")
-                .status(DeliveryStatus.CREATED)
+                .status(DeliveryStatus.AVAILABLE)
                 .shippingAddressSnapshot("123 Main St, Springfield")
                 .customerNotes("Ring bell")
                 .createdAt(Instant.now())
@@ -65,26 +70,71 @@ class DeliveryServiceTest {
         DeliveryDto dto = deliveryService.createDelivery(request);
 
         assertNotNull(dto);
-        assertEquals(DeliveryStatus.CREATED, dto.getStatus());
+        assertEquals(DeliveryStatus.AVAILABLE, dto.getStatus());
         assertEquals("TRK-1234567890", dto.getTrackingNumber());
+        assertEquals(50L, dto.getCustomerId());
+        assertEquals(101L, dto.getMerchantId());
     }
 
     @Test
-    @DisplayName("Assign Delivery to Agent - Success")
+    @DisplayName("Delivery Agent Self-Accepts Available Delivery - Success")
+    void testAcceptDelivery_Success() {
+        Delivery existing = Delivery.builder()
+                .id(1L)
+                .orderId(100L)
+                .trackingNumber("TRK-1234567890")
+                .status(DeliveryStatus.AVAILABLE)
+                .shippingAddressSnapshot("123 Main St, Springfield")
+                .build();
+
+        when(deliveryRepository.findByIdForUpdate(1L)).thenReturn(Optional.of(existing));
+        when(deliveryRepository.save(any(Delivery.class))).thenReturn(existing);
+
+        DeliveryDto dto = deliveryService.acceptDelivery(1L, 4L, "delivery_dan");
+
+        assertNotNull(dto);
+        assertEquals(DeliveryStatus.ASSIGNED, dto.getStatus());
+        assertEquals(4L, dto.getDeliveryAgentId());
+        assertEquals("delivery_dan", dto.getDeliveryAgentName());
+        verify(rabbitTemplate, times(1)).convertAndSend(any(), eq("delivery.status.changed"), any(Object.class));
+    }
+
+    @Test
+    @DisplayName("Delivery Agent Self-Accept - Already Assigned Throws BadRequestException")
+    void testAcceptDelivery_AlreadyAssigned_ThrowsException() {
+        Delivery alreadyAssigned = Delivery.builder()
+                .id(1L)
+                .orderId(100L)
+                .trackingNumber("TRK-1234567890")
+                .deliveryAgentId(9L)
+                .status(DeliveryStatus.ASSIGNED)
+                .build();
+
+        when(deliveryRepository.findByIdForUpdate(1L)).thenReturn(Optional.of(alreadyAssigned));
+
+        BadRequestException ex = assertThrows(BadRequestException.class, () ->
+                deliveryService.acceptDelivery(1L, 4L, "delivery_dan"));
+
+        assertEquals("Delivery is no longer available.", ex.getMessage());
+    }
+
+    @Test
+    @DisplayName("Assign Delivery to Agent by Admin - Success")
     void testAssignDelivery_Success() {
         Delivery existing = Delivery.builder()
                 .id(1L)
                 .orderId(100L)
                 .trackingNumber("TRK-1234567890")
-                .status(DeliveryStatus.CREATED)
+                .status(DeliveryStatus.AVAILABLE)
                 .shippingAddressSnapshot("123 Main St, Springfield")
                 .build();
 
         DeliveryAssignmentRequest assignReq = DeliveryAssignmentRequest.builder()
                 .deliveryAgentId(4L)
+                .deliveryAgentName("delivery_dan")
                 .build();
 
-        when(deliveryRepository.findById(1L)).thenReturn(Optional.of(existing));
+        when(deliveryRepository.findByIdForUpdate(1L)).thenReturn(Optional.of(existing));
         when(deliveryRepository.save(any(Delivery.class))).thenReturn(existing);
 
         DeliveryDto dto = deliveryService.assignDelivery(1L, assignReq);
@@ -136,7 +186,7 @@ class DeliveryServiceTest {
                 .build();
 
         DeliveryStatusUpdateRequest updateReq = DeliveryStatusUpdateRequest.builder()
-                .status(DeliveryStatus.DELIVERED) // Jump from ASSIGNED to DELIVERED directly
+                .status(DeliveryStatus.DELIVERED) // Jump from ASSIGNED to DELIVERED directly without PICKED_UP
                 .build();
 
         when(deliveryRepository.findById(1L)).thenReturn(Optional.of(existing));
@@ -158,7 +208,7 @@ class DeliveryServiceTest {
                 .build();
 
         DeliveryStatusUpdateRequest updateReq = DeliveryStatusUpdateRequest.builder()
-                .status(DeliveryStatus.ACCEPTED)
+                .status(DeliveryStatus.PICKED_UP)
                 .build();
 
         when(deliveryRepository.findById(1L)).thenReturn(Optional.of(existing));
@@ -166,4 +216,28 @@ class DeliveryServiceTest {
         assertThrows(ForbiddenException.class, () ->
                 deliveryService.updateDeliveryStatus(1L, updateReq, 999L, UserRole.DELIVERY_AGENT));
     }
+
+    @Test
+    @DisplayName("Get Delivery Summary - Returns Counts")
+    void testGetDeliverySummary() {
+        when(deliveryRepository.count()).thenReturn(10L);
+        when(deliveryRepository.countByStatus(DeliveryStatus.AVAILABLE)).thenReturn(3L);
+        when(deliveryRepository.countByStatus(DeliveryStatus.CREATED)).thenReturn(0L);
+        when(deliveryRepository.countByStatus(DeliveryStatus.ASSIGNED)).thenReturn(2L);
+        when(deliveryRepository.countByStatus(DeliveryStatus.ACCEPTED)).thenReturn(0L);
+        when(deliveryRepository.countByStatus(DeliveryStatus.PICKED_UP)).thenReturn(2L);
+        when(deliveryRepository.countByStatus(DeliveryStatus.OUT_FOR_DELIVERY)).thenReturn(1L);
+        when(deliveryRepository.countByStatus(DeliveryStatus.DELIVERED)).thenReturn(2L);
+        when(deliveryRepository.countByStatus(DeliveryStatus.FAILED)).thenReturn(0L);
+        when(deliveryRepository.countByStatus(DeliveryStatus.CANCELLED)).thenReturn(0L);
+
+        DeliverySummaryDto summary = deliveryService.getDeliverySummary();
+
+        assertNotNull(summary);
+        assertEquals(10L, summary.getTotalDeliveries());
+        assertEquals(3L, summary.getAvailableDeliveries());
+        assertEquals(2L, summary.getAssignedDeliveries());
+        assertEquals(2L, summary.getDeliveredDeliveries());
+    }
 }
+

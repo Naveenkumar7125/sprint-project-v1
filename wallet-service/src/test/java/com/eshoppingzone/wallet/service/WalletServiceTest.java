@@ -1,13 +1,13 @@
 package com.eshoppingzone.wallet.service;
 
-import com.eshoppingzone.common.dto.wallet.InternalWalletTransferRequest;
-import com.eshoppingzone.common.dto.wallet.InternalWalletTransferResponse;
-import com.eshoppingzone.common.dto.wallet.WalletDto;
-import com.eshoppingzone.common.dto.wallet.WalletTopUpRequest;
-import com.eshoppingzone.common.enums.TransactionStatus;
-import com.eshoppingzone.common.enums.UserRole;
-import com.eshoppingzone.common.enums.WalletStatus;
-import com.eshoppingzone.common.exception.InsufficientBalanceException;
+import com.eshoppingzone.wallet.dto.InternalWalletTransferRequest;
+import com.eshoppingzone.wallet.dto.InternalWalletTransferResponse;
+import com.eshoppingzone.wallet.dto.WalletDto;
+import com.eshoppingzone.wallet.dto.WalletTopUpRequest;
+import com.eshoppingzone.wallet.enums.TransactionStatus;
+import com.eshoppingzone.wallet.enums.UserRole;
+import com.eshoppingzone.wallet.enums.WalletStatus;
+import com.eshoppingzone.wallet.exception.InsufficientBalanceException;
 import com.eshoppingzone.wallet.entity.Wallet;
 import com.eshoppingzone.wallet.entity.WalletTransaction;
 import com.eshoppingzone.wallet.repository.WalletRepository;
@@ -46,7 +46,7 @@ class WalletServiceTest {
     }
 
     @Test
-    @DisplayName("Financial Rule: Customer (₹5000) & Admin (₹10000) with Order (₹2500) -> Customer ₹2500, Admin ₹12500")
+    @DisplayName("Financial Rule: Customer (₹5000), Admin (₹10000), Merchant (₹0) with Order (₹2500) -> Customer ₹2500, Admin ₹10250 (10%), Merchant ₹2250 (90%)")
     void transferCustomerToAdmin_Success() {
         Long customerId = 100L;
         BigDecimal orderAmount = new BigDecimal("2500.00");
@@ -57,6 +57,7 @@ class WalletServiceTest {
                 .amount(orderAmount)
                 .transactionReference(txRef)
                 .orderId(10001L)
+                .merchantId(2L)
                 .build();
 
         Wallet customerWallet = Wallet.builder()
@@ -77,11 +78,23 @@ class WalletServiceTest {
                 .status(WalletStatus.ACTIVE)
                 .build();
 
+        Wallet merchantWallet = Wallet.builder()
+                .id(3L)
+                .userId(2L)
+                .role(UserRole.MERCHANT)
+                .balance(BigDecimal.ZERO)
+                .availableBalance(BigDecimal.ZERO)
+                .currency("INR")
+                .status(WalletStatus.ACTIVE)
+                .build();
+
         when(transactionRepository.findByTransactionReference(txRef + "-CUST-DEBIT")).thenReturn(Optional.empty());
         when(walletRepository.findByUserId(customerId)).thenReturn(Optional.of(customerWallet));
+        when(walletRepository.findByUserId(2L)).thenReturn(Optional.of(merchantWallet));
         when(walletRepository.findAdminWallets()).thenReturn(List.of(adminWallet));
         when(walletRepository.save(customerWallet)).thenReturn(customerWallet);
         when(walletRepository.save(adminWallet)).thenReturn(adminWallet);
+        when(walletRepository.save(merchantWallet)).thenReturn(merchantWallet);
 
         InternalWalletTransferResponse response = walletService.transferCustomerToAdmin(request);
 
@@ -89,8 +102,10 @@ class WalletServiceTest {
         assertTrue(response.isSuccessful());
         assertEquals(TransactionStatus.SUCCESS, response.getStatus());
         assertEquals(new BigDecimal("2500.00"), customerWallet.getBalance());
-        assertEquals(new BigDecimal("12500.00"), adminWallet.getBalance());
-        verify(transactionRepository, times(2)).save(any(WalletTransaction.class));
+        assertEquals(new BigDecimal("10250.00"), adminWallet.getBalance());
+        assertEquals(new BigDecimal("2250.00"), merchantWallet.getBalance());
+        assertEquals(new BigDecimal("2250.00"), merchantWallet.getAvailableBalance());
+        verify(transactionRepository, times(3)).save(any(WalletTransaction.class));
     }
 
     @Test

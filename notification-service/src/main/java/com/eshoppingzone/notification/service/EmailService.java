@@ -1,10 +1,11 @@
 package com.eshoppingzone.notification.service;
 
+import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -30,11 +31,15 @@ public class EmailService {
         }
 
         try {
-            SimpleMailMessage message = new SimpleMailMessage();
-            message.setFrom(fromEmail);
-            message.setTo(to);
-            message.setSubject(subject);
-            message.setText(content);
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+            helper.setFrom(fromEmail, "EShopping Zone");
+            helper.setTo(to);
+            helper.setSubject(subject);
+
+            boolean isHtml = content != null && (content.contains("<html") || content.contains("<div") || content.contains("<table"));
+            helper.setText(content, isHtml);
+
             mailSender.send(message);
             log.info("Email successfully dispatched to {}", to);
         } catch (Exception e) {

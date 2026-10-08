@@ -1,6 +1,6 @@
 package com.eshoppingzone.order.client;
 
-import com.eshoppingzone.common.dto.product.ProductDto;
+import com.eshoppingzone.order.dto.ProductDto;
 import org.springframework.stereotype.Component;
 
 @Component

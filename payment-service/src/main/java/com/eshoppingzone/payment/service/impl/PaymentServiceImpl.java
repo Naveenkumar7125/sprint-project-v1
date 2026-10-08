@@ -1,19 +1,19 @@
 package com.eshoppingzone.payment.service.impl;
 
-import com.eshoppingzone.common.dto.payment.*;
-import com.eshoppingzone.common.dto.wallet.InternalWalletTransferRequest;
-import com.eshoppingzone.common.dto.wallet.InternalWalletTransferResponse;
-import com.eshoppingzone.common.enums.PaymentMethod;
-import com.eshoppingzone.common.enums.PaymentStatus;
-import com.eshoppingzone.common.enums.RefundStatus;
-import com.eshoppingzone.common.event.PaymentFailedEvent;
-import com.eshoppingzone.common.event.PaymentInitiatedEvent;
-import com.eshoppingzone.common.event.PaymentSuccessEvent;
-import com.eshoppingzone.common.event.RefundCompletedEvent;
-import com.eshoppingzone.common.exception.BadRequestException;
-import com.eshoppingzone.common.exception.ConflictException;
-import com.eshoppingzone.common.exception.PaymentFailedException;
-import com.eshoppingzone.common.exception.ResourceNotFoundException;
+import com.eshoppingzone.payment.dto.*;
+import com.eshoppingzone.payment.dto.InternalWalletTransferRequest;
+import com.eshoppingzone.payment.dto.InternalWalletTransferResponse;
+import com.eshoppingzone.payment.enums.PaymentMethod;
+import com.eshoppingzone.payment.enums.PaymentStatus;
+import com.eshoppingzone.payment.enums.RefundStatus;
+import com.eshoppingzone.payment.event.PaymentFailedEvent;
+import com.eshoppingzone.payment.event.PaymentInitiatedEvent;
+import com.eshoppingzone.payment.event.PaymentSuccessEvent;
+import com.eshoppingzone.payment.event.RefundCompletedEvent;
+import com.eshoppingzone.payment.exception.BadRequestException;
+import com.eshoppingzone.payment.exception.ConflictException;
+import com.eshoppingzone.payment.exception.PaymentFailedException;
+import com.eshoppingzone.payment.exception.ResourceNotFoundException;
 import com.eshoppingzone.payment.client.WalletClient;
 import com.eshoppingzone.payment.entity.Payment;
 import com.eshoppingzone.payment.entity.Refund;
@@ -83,8 +83,10 @@ public class PaymentServiceImpl implements PaymentService {
                         .amount(request.getAmount())
                         .transactionReference("ORDER-" + request.getOrderId())
                         .orderId(request.getOrderId())
+                        .merchantId(request.getMerchantId())
                         .description("Payment for order #" + request.getOrderId())
                         .build();
+
 
                 InternalWalletTransferResponse transferResponse = walletClient.transferCustomerToAdmin(transferRequest);
 

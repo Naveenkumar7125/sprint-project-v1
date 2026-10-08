@@ -1,9 +1,9 @@
 package com.eshoppingzone.profile.controller;
 
-import com.eshoppingzone.common.dto.profile.AddressDto;
-import com.eshoppingzone.common.dto.profile.UpdateProfileRequest;
-import com.eshoppingzone.common.dto.profile.UserProfileDto;
-import com.eshoppingzone.common.security.SecurityUtils;
+import com.eshoppingzone.profile.dto.AddressDto;
+import com.eshoppingzone.profile.dto.UpdateProfileRequest;
+import com.eshoppingzone.profile.dto.UserProfileDto;
+import com.eshoppingzone.profile.security.SecurityUtils;
 import com.eshoppingzone.profile.service.ProfileService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -28,7 +28,7 @@ public class ProfileController {
         this.profileService = profileService;
     }
 
-    @GetMapping("/me")
+    @GetMapping({"", "/me"})
     @Operation(summary = "Get current authenticated user profile and addresses")
     public ResponseEntity<UserProfileDto> getMyProfile() {
         Long userId = SecurityUtils.getCurrentUserId();
@@ -36,7 +36,7 @@ public class ProfileController {
         return ResponseEntity.ok(profile);
     }
 
-    @PutMapping("/me")
+    @PutMapping({"", "/me"})
     @Operation(summary = "Update current user profile information")
     public ResponseEntity<UserProfileDto> updateMyProfile(@Valid @RequestBody UpdateProfileRequest request) {
         Long userId = SecurityUtils.getCurrentUserId();

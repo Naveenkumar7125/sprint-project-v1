@@ -1,11 +1,11 @@
 package com.eshoppingzone.recommendation.service;
 
-import com.eshoppingzone.common.dto.recommendation.FrequentlyPurchasedTogetherDto;
-import com.eshoppingzone.common.dto.recommendation.ProductRecommendationDto;
-import com.eshoppingzone.common.dto.recommendation.SearchEventRequest;
-import com.eshoppingzone.common.dto.recommendation.UserCategoryPreferenceDto;
-import com.eshoppingzone.common.event.OrderConfirmedEvent;
-import com.eshoppingzone.common.event.ProductSearchedEvent;
+import com.eshoppingzone.recommendation.dto.FrequentlyPurchasedTogetherDto;
+import com.eshoppingzone.recommendation.dto.ProductRecommendationDto;
+import com.eshoppingzone.recommendation.dto.SearchEventRequest;
+import com.eshoppingzone.recommendation.dto.UserCategoryPreferenceDto;
+import com.eshoppingzone.recommendation.event.OrderConfirmedEvent;
+import com.eshoppingzone.recommendation.event.ProductSearchedEvent;
 
 import java.util.List;
 

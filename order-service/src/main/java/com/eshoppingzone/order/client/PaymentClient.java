@@ -1,9 +1,9 @@
 package com.eshoppingzone.order.client;
 
-import com.eshoppingzone.common.dto.payment.PaymentDto;
-import com.eshoppingzone.common.dto.payment.PaymentInitiateRequest;
-import com.eshoppingzone.common.dto.payment.RefundDto;
-import com.eshoppingzone.common.dto.payment.RefundRequest;
+import com.eshoppingzone.order.dto.PaymentDto;
+import com.eshoppingzone.order.dto.PaymentInitiateRequest;
+import com.eshoppingzone.order.dto.RefundDto;
+import com.eshoppingzone.order.dto.RefundRequest;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;

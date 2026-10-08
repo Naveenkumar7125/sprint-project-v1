@@ -1,6 +1,6 @@
 package com.eshoppingzone.recommendation.consumer;
 
-import com.eshoppingzone.common.event.ProductSearchedEvent;
+import com.eshoppingzone.recommendation.event.ProductSearchedEvent;
 import com.eshoppingzone.recommendation.config.RabbitMQConfig;
 import com.eshoppingzone.recommendation.service.RecommendationService;
 import lombok.RequiredArgsConstructor;

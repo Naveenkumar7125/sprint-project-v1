@@ -1,7 +1,7 @@
 package com.eshoppingzone.notification.dto;
 
-import com.eshoppingzone.common.enums.NotificationChannel;
-import com.eshoppingzone.common.enums.NotificationStatus;
+import com.eshoppingzone.notification.enums.NotificationChannel;
+import com.eshoppingzone.notification.enums.NotificationStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

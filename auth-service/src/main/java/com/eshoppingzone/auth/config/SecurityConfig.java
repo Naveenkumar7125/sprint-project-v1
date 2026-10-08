@@ -1,7 +1,7 @@
 package com.eshoppingzone.auth.config;
 
-import com.eshoppingzone.common.security.JwtAuthenticationFilter;
-import com.eshoppingzone.common.security.JwtUtils;
+import com.eshoppingzone.auth.security.JwtAuthenticationFilter;
+import com.eshoppingzone.auth.security.JwtUtils;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -45,6 +45,7 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/api/v1/auth/register",
                                 "/api/v1/auth/login",
+                                "/api/v1/auth/social-login",
                                 "/api/v1/auth/refresh",
                                 "/api/v1/auth/forgot-password",
                                 "/api/v1/auth/reset-password",

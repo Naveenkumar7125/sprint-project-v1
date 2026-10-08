@@ -1,6 +1,6 @@
 package com.eshoppingzone.order.repository;
 
-import com.eshoppingzone.common.enums.OrderStatus;
+import com.eshoppingzone.order.enums.OrderStatus;
 import com.eshoppingzone.order.entity.Order;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -19,6 +19,10 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     Page<Order> findByCustomerId(Long customerId, Pageable pageable);
 
     Page<Order> findByStatus(OrderStatus status, Pageable pageable);
+
+    @Query(value = "SELECT DISTINCT o FROM Order o JOIN o.items i WHERE i.merchantId = :merchantId",
+           countQuery = "SELECT COUNT(DISTINCT o) FROM Order o JOIN o.items i WHERE i.merchantId = :merchantId")
+    Page<Order> findByMerchantId(@Param("merchantId") Long merchantId, Pageable pageable);
 
     @Query("SELECT o FROM Order o LEFT JOIN FETCH o.items WHERE o.id = :id")
     Optional<Order> findByIdWithItems(@Param("id") Long id);

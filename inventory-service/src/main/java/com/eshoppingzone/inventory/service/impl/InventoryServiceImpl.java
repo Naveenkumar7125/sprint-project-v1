@@ -1,8 +1,8 @@
 package com.eshoppingzone.inventory.service.impl;
 
-import com.eshoppingzone.common.dto.inventory.*;
-import com.eshoppingzone.common.exception.BadRequestException;
-import com.eshoppingzone.common.exception.ResourceNotFoundException;
+import com.eshoppingzone.inventory.dto.*;
+import com.eshoppingzone.inventory.exception.BadRequestException;
+import com.eshoppingzone.inventory.exception.ResourceNotFoundException;
 import com.eshoppingzone.inventory.entity.Inventory;
 import com.eshoppingzone.inventory.entity.InventoryHistory;
 import com.eshoppingzone.inventory.event.InventoryEventPublisher;
@@ -36,10 +36,20 @@ public class InventoryServiceImpl implements InventoryService {
     }
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public InventoryDto getInventory(Long productId) {
         Inventory inventory = inventoryRepository.findByProductId(productId)
-                .orElseThrow(() -> new ResourceNotFoundException("Inventory not found for product id: " + productId));
+                .orElseGet(() -> {
+                    log.info("Auto-initializing default inventory for productId: {}", productId);
+                    Inventory newInv = Inventory.builder()
+                            .productId(productId)
+                            .availableStock(25)
+                            .reservedStock(0)
+                            .soldStock(0)
+                            .lowStockThreshold(5)
+                            .build();
+                    return inventoryRepository.save(newInv);
+                });
         return mapToDto(inventory);
     }
 

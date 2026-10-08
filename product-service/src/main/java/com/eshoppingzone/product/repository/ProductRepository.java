@@ -28,4 +28,6 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     Page<Product> findByCategoryName(@Param("categoryName") String categoryName, Pageable pageable);
 
     List<Product> findByMerchantId(Long merchantId);
+
+    long countByCategoryId(Long categoryId);
 }

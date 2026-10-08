@@ -1,6 +1,6 @@
 package com.eshoppingzone.wallet.service;
 
-import com.eshoppingzone.common.dto.wallet.*;
+import com.eshoppingzone.wallet.dto.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 

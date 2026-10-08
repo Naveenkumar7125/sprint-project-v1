@@ -1,6 +1,6 @@
 package com.eshoppingzone.delivery.entity;
 
-import com.eshoppingzone.common.enums.DeliveryStatus;
+import com.eshoppingzone.delivery.enums.DeliveryStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -29,6 +29,12 @@ public class Delivery {
     @Column(name = "order_id", nullable = false)
     private Long orderId;
 
+    @Column(name = "customer_id")
+    private Long customerId;
+
+    @Column(name = "merchant_id")
+    private Long merchantId;
+
     @Column(name = "tracking_number", nullable = false, unique = true, length = 60)
     private String trackingNumber;
 
@@ -42,8 +48,17 @@ public class Delivery {
     @Column(nullable = false, length = 30)
     private DeliveryStatus status;
 
+    @Column(name = "recipient_name", length = 100)
+    private String recipientName;
+
+    @Column(name = "recipient_phone", length = 30)
+    private String recipientPhone;
+
     @Column(name = "shipping_address_snapshot", nullable = false, length = 500)
     private String shippingAddressSnapshot;
+
+    @Column(name = "pickup_address_snapshot", length = 500)
+    private String pickupAddressSnapshot;
 
     @Column(name = "customer_notes", length = 500)
     private String customerNotes;
@@ -53,6 +68,12 @@ public class Delivery {
 
     @Column(name = "actual_delivery_time")
     private Instant actualDeliveryTime;
+
+    @Column(name = "assigned_at")
+    private Instant assignedAt;
+
+    @Column(name = "picked_up_at")
+    private Instant pickedUpAt;
 
     @Version
     @Column(nullable = false)

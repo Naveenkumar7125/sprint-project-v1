@@ -1,9 +1,9 @@
 package com.eshoppingzone.auth.event;
 
-import com.eshoppingzone.common.event.BaseEvent;
-import com.eshoppingzone.common.event.PasswordResetCompletedEvent;
-import com.eshoppingzone.common.event.PasswordResetRequestedEvent;
-import com.eshoppingzone.common.event.UserRegisteredEvent;
+import com.eshoppingzone.auth.event.BaseEvent;
+import com.eshoppingzone.auth.event.PasswordResetCompletedEvent;
+import com.eshoppingzone.auth.event.PasswordResetRequestedEvent;
+import com.eshoppingzone.auth.event.UserRegisteredEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -34,7 +34,11 @@ public class AuthEventPublisher {
         event.setCorrelationId(UUID.randomUUID().toString());
 
         log.info("Publishing UserRegisteredEvent for userId: {}, role: {}", event.getUserId(), event.getRole());
-        rabbitTemplate.convertAndSend(exchange, "auth.user.registered", event);
+        try {
+            rabbitTemplate.convertAndSend(exchange, "auth.user.registered", event);
+        } catch (Exception ex) {
+            log.warn("RabbitMQ unavailable, skipped publishing UserRegisteredEvent: {}", ex.getMessage());
+        }
     }
 
     public void publishPasswordResetRequested(PasswordResetRequestedEvent event) {
@@ -45,7 +49,11 @@ public class AuthEventPublisher {
 
         // Do NOT log the raw reset token
         log.info("Publishing PasswordResetRequestedEvent for email: {}", event.getEmail());
-        rabbitTemplate.convertAndSend(exchange, "auth.password.reset.requested", event);
+        try {
+            rabbitTemplate.convertAndSend(exchange, "auth.password.reset.requested", event);
+        } catch (Exception ex) {
+            log.warn("RabbitMQ unavailable, skipped publishing PasswordResetRequestedEvent: {}", ex.getMessage());
+        }
     }
 
     public void publishPasswordResetCompleted(PasswordResetCompletedEvent event) {
@@ -55,6 +63,10 @@ public class AuthEventPublisher {
         event.setCorrelationId(UUID.randomUUID().toString());
 
         log.info("Publishing PasswordResetCompletedEvent for email: {}", event.getEmail());
-        rabbitTemplate.convertAndSend(exchange, "auth.password.reset.completed", event);
+        try {
+            rabbitTemplate.convertAndSend(exchange, "auth.password.reset.completed", event);
+        } catch (Exception ex) {
+            log.warn("RabbitMQ unavailable, skipped publishing PasswordResetCompletedEvent: {}", ex.getMessage());
+        }
     }
 }

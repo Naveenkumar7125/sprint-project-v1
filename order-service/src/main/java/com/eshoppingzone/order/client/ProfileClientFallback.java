@@ -1,6 +1,6 @@
 package com.eshoppingzone.order.client;
 
-import com.eshoppingzone.common.dto.profile.AddressDto;
+import com.eshoppingzone.order.dto.AddressDto;
 import org.springframework.stereotype.Component;
 
 @Component

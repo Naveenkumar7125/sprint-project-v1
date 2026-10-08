@@ -1,7 +1,7 @@
 package com.eshoppingzone.wallet.entity;
 
-import com.eshoppingzone.common.enums.UserRole;
-import com.eshoppingzone.common.enums.WalletStatus;
+import com.eshoppingzone.wallet.enums.UserRole;
+import com.eshoppingzone.wallet.enums.WalletStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -36,6 +36,14 @@ public class Wallet {
     @Column(nullable = false, precision = 19, scale = 2)
     @Builder.Default
     private BigDecimal balance = BigDecimal.ZERO;
+
+    @Column(name = "pending_balance", nullable = false, precision = 19, scale = 2)
+    @Builder.Default
+    private BigDecimal pendingBalance = BigDecimal.ZERO;
+
+    @Column(name = "available_balance", nullable = false, precision = 19, scale = 2)
+    @Builder.Default
+    private BigDecimal availableBalance = BigDecimal.ZERO;
 
     @Column(nullable = false, length = 3)
     @Builder.Default

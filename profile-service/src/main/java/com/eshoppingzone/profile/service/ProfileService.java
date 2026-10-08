@@ -1,8 +1,8 @@
 package com.eshoppingzone.profile.service;
 
-import com.eshoppingzone.common.dto.profile.AddressDto;
-import com.eshoppingzone.common.dto.profile.UpdateProfileRequest;
-import com.eshoppingzone.common.dto.profile.UserProfileDto;
+import com.eshoppingzone.profile.dto.AddressDto;
+import com.eshoppingzone.profile.dto.UpdateProfileRequest;
+import com.eshoppingzone.profile.dto.UserProfileDto;
 
 import java.util.List;
 

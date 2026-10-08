@@ -1,28 +1,29 @@
 package com.eshoppingzone.order.service.impl;
 
-import com.eshoppingzone.common.dto.delivery.DeliveryCreateRequest;
-import com.eshoppingzone.common.dto.inventory.StockConfirmRequest;
-import com.eshoppingzone.common.dto.inventory.StockReleaseRequest;
-import com.eshoppingzone.common.dto.inventory.StockReservationRequest;
-import com.eshoppingzone.common.dto.inventory.StockReservationResponse;
-import com.eshoppingzone.common.dto.order.OrderCancelRequest;
-import com.eshoppingzone.common.dto.order.OrderCreateRequest;
-import com.eshoppingzone.common.dto.order.OrderDto;
-import com.eshoppingzone.common.dto.order.OrderItemDto;
-import com.eshoppingzone.common.dto.payment.PaymentDto;
-import com.eshoppingzone.common.dto.payment.PaymentInitiateRequest;
-import com.eshoppingzone.common.dto.payment.RefundRequest;
-import com.eshoppingzone.common.dto.product.ProductDto;
-import com.eshoppingzone.common.dto.profile.AddressDto;
-import com.eshoppingzone.common.enums.OrderStatus;
-import com.eshoppingzone.common.enums.PaymentMethod;
-import com.eshoppingzone.common.enums.PaymentStatus;
-import com.eshoppingzone.common.enums.UserRole;
-import com.eshoppingzone.common.event.OrderCancelledEvent;
-import com.eshoppingzone.common.event.OrderConfirmedEvent;
-import com.eshoppingzone.common.exception.BadRequestException;
-import com.eshoppingzone.common.exception.ForbiddenException;
-import com.eshoppingzone.common.exception.ResourceNotFoundException;
+import com.eshoppingzone.order.dto.DeliveryCreateRequest;
+import com.eshoppingzone.order.dto.DeliveryDto;
+import com.eshoppingzone.order.dto.StockConfirmRequest;
+import com.eshoppingzone.order.dto.StockReleaseRequest;
+import com.eshoppingzone.order.dto.StockReservationRequest;
+import com.eshoppingzone.order.dto.StockReservationResponse;
+import com.eshoppingzone.order.dto.OrderCancelRequest;
+import com.eshoppingzone.order.dto.OrderCreateRequest;
+import com.eshoppingzone.order.dto.OrderDto;
+import com.eshoppingzone.order.dto.OrderItemDto;
+import com.eshoppingzone.order.dto.PaymentDto;
+import com.eshoppingzone.order.dto.PaymentInitiateRequest;
+import com.eshoppingzone.order.dto.RefundRequest;
+import com.eshoppingzone.order.dto.ProductDto;
+import com.eshoppingzone.order.dto.AddressDto;
+import com.eshoppingzone.order.enums.OrderStatus;
+import com.eshoppingzone.order.enums.PaymentMethod;
+import com.eshoppingzone.order.enums.PaymentStatus;
+import com.eshoppingzone.order.enums.UserRole;
+import com.eshoppingzone.order.event.OrderCancelledEvent;
+import com.eshoppingzone.order.event.OrderConfirmedEvent;
+import com.eshoppingzone.order.exception.BadRequestException;
+import com.eshoppingzone.order.exception.ForbiddenException;
+import com.eshoppingzone.order.exception.ResourceNotFoundException;
 import com.eshoppingzone.order.client.*;
 import com.eshoppingzone.order.entity.Order;
 import com.eshoppingzone.order.entity.OrderItem;
@@ -66,23 +67,31 @@ public class OrderServiceImpl implements OrderService {
         log.info("Initiating checkout saga for customer ID: {}", customerId);
 
         // 1. Fetch address details snapshot
-        String addressSnapshot = "Address ID: " + request.getShippingAddressId();
-        try {
-            AddressDto addressDto = profileClient.getAddressById(request.getShippingAddressId());
-            if (addressDto != null) {
-                addressSnapshot = String.format("%s, %s, %s, %s - %s",
-                        addressDto.getStreetAddress(),
-                        addressDto.getCity(),
-                        addressDto.getState(),
-                        addressDto.getCountry(),
-                        addressDto.getPostalCode());
+        String addressSnapshot = null;
+        if (org.springframework.util.StringUtils.hasText(request.getShippingAddressSnapshot())) {
+            addressSnapshot = request.getShippingAddressSnapshot();
+        } else {
+            try {
+                AddressDto addressDto = profileClient.getAddressById(request.getShippingAddressId());
+                if (addressDto != null && addressDto.getStreetAddress() != null) {
+                    addressSnapshot = String.format("%s, %s, %s, %s - %s",
+                            addressDto.getStreetAddress(),
+                            addressDto.getCity(),
+                            addressDto.getState(),
+                            addressDto.getCountry(),
+                            addressDto.getPostalCode());
+                }
+            } catch (Exception e) {
+                log.warn("Could not fetch address details from profile-service: {}", e.getMessage());
             }
-        } catch (Exception e) {
-            log.warn("Could not fetch address details from profile-service, using fallback ID: {}", e.getMessage());
+        }
+
+        if (!org.springframework.util.StringUtils.hasText(addressSnapshot)) {
+            addressSnapshot = "Address ID: " + request.getShippingAddressId();
         }
 
         // 2. Fetch authoritative product info & calculate totals
-        BigDecimal totalAmount = BigDecimal.ZERO;
+        BigDecimal itemsTotal = BigDecimal.ZERO;
         List<OrderItem> orderItems = new ArrayList<>();
 
         for (OrderCreateRequest.OrderItemRequest itemReq : request.getItems()) {
@@ -102,7 +111,7 @@ public class OrderServiceImpl implements OrderService {
             }
 
             BigDecimal itemTotal = product.getPrice().multiply(BigDecimal.valueOf(itemReq.getQuantity()));
-            totalAmount = totalAmount.add(itemTotal);
+            itemsTotal = itemsTotal.add(itemTotal);
 
             OrderItem orderItem = OrderItem.builder()
                     .productId(product.getId())
@@ -116,6 +125,12 @@ public class OrderServiceImpl implements OrderService {
 
             orderItems.add(orderItem);
         }
+
+        // Apply delivery charge of 60 if total cost of ordering products is less than 500
+        BigDecimal deliveryFee = (itemsTotal.compareTo(BigDecimal.valueOf(500)) < 0)
+                ? BigDecimal.valueOf(60)
+                : BigDecimal.ZERO;
+        BigDecimal totalAmount = itemsTotal.add(deliveryFee);
 
         // 3. Create and persist initial order
         String orderNumber = "ORD-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
@@ -168,12 +183,18 @@ public class OrderServiceImpl implements OrderService {
         }
 
         // 5. Saga Step: Initiate Payment
+        Long orderMerchantId = (savedOrder.getItems() != null && !savedOrder.getItems().isEmpty())
+                ? savedOrder.getItems().get(0).getMerchantId()
+                : null;
+
         PaymentInitiateRequest payReq = PaymentInitiateRequest.builder()
                 .orderId(savedOrder.getId())
                 .customerId(customerId)
                 .amount(totalAmount)
                 .paymentMethod(request.getPaymentMethod())
+                .merchantId(orderMerchantId)
                 .build();
+
 
         PaymentDto paymentDto = null;
         try {
@@ -208,6 +229,7 @@ public class OrderServiceImpl implements OrderService {
         try {
             inventoryClient.confirmStock(StockConfirmRequest.builder()
                     .orderId(savedOrder.getId())
+                    .items(stockItems)
                     .build());
         } catch (Exception e) {
             log.error("Stock confirmation failed for order {}: {}", savedOrder.getId(), e.getMessage());
@@ -217,19 +239,21 @@ public class OrderServiceImpl implements OrderService {
         savedOrder.setStatus(OrderStatus.CONFIRMED);
         savedOrder = orderRepository.save(savedOrder);
 
-        // 8. Saga Step: Create Delivery Task
+        // 8. Publish OrderConfirmedEvent
         try {
-            deliveryClient.createDelivery(DeliveryCreateRequest.builder()
-                    .orderId(savedOrder.getId())
-                    .shippingAddressSnapshot(addressSnapshot)
-                    .customerNotes("Standard delivery")
-                    .build());
-        } catch (Exception e) {
-            log.error("Delivery creation call failed for order {}: {}", savedOrder.getId(), e.getMessage());
-        }
+            List<OrderConfirmedEvent.OrderItemSummary> itemSummaries = savedOrder.getItems() != null
+                    ? savedOrder.getItems().stream()
+                    .map(i -> OrderConfirmedEvent.OrderItemSummary.builder()
+                            .productId(i.getProductId())
+                            .productName(i.getProductName())
+                            .merchantId(i.getMerchantId())
+                            .unitPrice(i.getUnitPrice())
+                            .quantity(i.getQuantity())
+                            .totalPrice(i.getTotalPrice())
+                            .build())
+                    .collect(Collectors.toList())
+                    : new ArrayList<>();
 
-        // 9. Publish OrderConfirmedEvent
-        try {
             OrderConfirmedEvent event = OrderConfirmedEvent.builder()
                     .eventId(UUID.randomUUID().toString())
                     .timestamp(Instant.now())
@@ -237,12 +261,38 @@ public class OrderServiceImpl implements OrderService {
                     .orderNumber(savedOrder.getOrderNumber())
                     .customerId(savedOrder.getCustomerId())
                     .totalAmount(savedOrder.getTotalAmount())
+                    .items(itemSummaries)
                     .build();
 
             rabbitTemplate.convertAndSend(exchange, "order.confirmed", event);
-            log.info("Published OrderConfirmedEvent for order {}", savedOrder.getOrderNumber());
+            log.info("Published OrderConfirmedEvent for order {} with {} item breakdown(s)", savedOrder.getOrderNumber(), itemSummaries.size());
         } catch (Exception e) {
             log.error("Failed to publish OrderConfirmedEvent: {}", e.getMessage());
+        }
+
+        // 9. Create Delivery record (status CREATED, waiting for merchant pickup preparation)
+        try {
+            Long primaryMerchantId = (savedOrder.getItems() != null && !savedOrder.getItems().isEmpty())
+                    ? savedOrder.getItems().get(0).getMerchantId()
+                    : null;
+
+            String recipientName = savedOrder.getCustomerUsername() != null ? savedOrder.getCustomerUsername() : ("Customer #" + savedOrder.getCustomerId());
+            String recipientPhone = "+91 98765 43210";
+
+            DeliveryCreateRequest deliveryReq = DeliveryCreateRequest.builder()
+                    .orderId(savedOrder.getId())
+                    .customerId(savedOrder.getCustomerId())
+                    .merchantId(primaryMerchantId)
+                    .recipientName(recipientName)
+                    .recipientPhone(recipientPhone)
+                    .shippingAddressSnapshot(savedOrder.getShippingAddressSnapshot())
+                    .customerNotes("Order #" + savedOrder.getOrderNumber())
+                    .build();
+
+            deliveryClient.createDelivery(deliveryReq);
+            log.info("Triggered delivery creation for order ID: {} with merchant ID: {}", savedOrder.getId(), primaryMerchantId);
+        } catch (Exception e) {
+            log.error("Failed to trigger delivery creation for order {}: {}", savedOrder.getId(), e.getMessage());
         }
 
         return mapToDto(savedOrder);
@@ -373,6 +423,86 @@ public class OrderServiceImpl implements OrderService {
             return orderRepository.findByStatus(status, pageable).map(this::mapToDto);
         }
         return orderRepository.findAll(pageable).map(this::mapToDto);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<OrderDto> getMerchantOrders(Long merchantId, Pageable pageable) {
+        return orderRepository.findByMerchantId(merchantId, pageable).map(this::mapToDto);
+    }
+
+    @Override
+    @Transactional
+    public OrderDto updateMerchantOrderStatus(Long orderId, OrderStatus newStatus, String remarks, Long userId, UserRole userRole) {
+        Order order = orderRepository.findByIdWithItems(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found with id: " + orderId));
+
+        boolean isAdmin = userRole == UserRole.ADMIN;
+        boolean isMerchantOfOrder = order.getItems() != null && order.getItems().stream()
+                .anyMatch(i -> i.getMerchantId() != null && i.getMerchantId().equals(userId));
+
+        if (!isAdmin && !isMerchantOfOrder) {
+            throw new ForbiddenException("You are not authorized to update status for this order");
+        }
+
+        OrderStatus currentStatus = order.getStatus();
+
+        // Validate merchant transition rules
+        if (!isAdmin) {
+            if (currentStatus == OrderStatus.CONFIRMED && (newStatus == OrderStatus.PROCESSING || newStatus == OrderStatus.READY_FOR_PICKUP)) {
+                // Allowed
+            } else if (currentStatus == OrderStatus.PROCESSING && newStatus == OrderStatus.READY_FOR_PICKUP) {
+                // Allowed
+            } else {
+                throw new BadRequestException(String.format("Invalid status transition from %s to %s for merchant", currentStatus, newStatus));
+            }
+        }
+
+        order.setStatus(newStatus);
+        Order savedOrder = orderRepository.save(order);
+        log.info("Merchant/Admin updated order {} status to {}", savedOrder.getOrderNumber(), newStatus);
+
+        // When order is marked READY_FOR_PICKUP, create Delivery Task in delivery-service
+        if (newStatus == OrderStatus.READY_FOR_PICKUP) {
+            try {
+                Long primaryMerchantId = (savedOrder.getItems() != null && !savedOrder.getItems().isEmpty())
+                        ? savedOrder.getItems().get(0).getMerchantId()
+                        : userId;
+
+                DeliveryDto delivery = deliveryClient.createDelivery(DeliveryCreateRequest.builder()
+                        .orderId(savedOrder.getId())
+                        .customerId(savedOrder.getCustomerId())
+                        .merchantId(primaryMerchantId)
+                        .shippingAddressSnapshot(savedOrder.getShippingAddressSnapshot())
+                        .customerNotes(remarks != null ? remarks : "Order packed and ready for pickup")
+                        .build());
+                log.info("Successfully requested Delivery Job creation for ready-for-pickup order {}: {}",
+                        savedOrder.getOrderNumber(), delivery != null ? delivery.getTrackingNumber() : "created");
+            } catch (Exception e) {
+                log.error("Failed to invoke delivery-service createDelivery for order {}: {}", savedOrder.getId(), e.getMessage());
+            }
+        }
+
+        return mapToDto(savedOrder);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public DeliveryDto getOrderDelivery(Long orderId, Long userId, UserRole userRole) {
+        Order order = orderRepository.findByIdWithItems(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found with id: " + orderId));
+
+        boolean isAdmin = userRole == UserRole.ADMIN;
+        boolean isAgent = userRole == UserRole.DELIVERY_AGENT;
+        boolean isCustomer = order.getCustomerId().equals(userId);
+        boolean isMerchant = order.getItems() != null && order.getItems().stream()
+                .anyMatch(i -> i.getMerchantId() != null && i.getMerchantId().equals(userId));
+
+        if (!isAdmin && !isAgent && !isCustomer && !isMerchant) {
+            throw new ForbiddenException("You are not authorized to view delivery tracking for this order");
+        }
+
+        return deliveryClient.getDeliveryByOrderId(orderId);
     }
 
     @Override

@@ -1,12 +1,93 @@
-.metadata/
+# ==========================================
+# Java & Maven Build Artifacts
+# ==========================================
 target/
 **/target/
 *.jar
 *.war
 *.ear
+*.nar
 *.class
+*.zip
+ 
+*.tar.gz
+*.rar
+
+# Maven wrapper and log files
+.mvn/wrapper/maven-wrapper.jar
+*.log
+**/*.log
+*.log.*
+eureka.log
+
+# ==========================================
+# Node.js & Angular Frontend Artifacts
+# ==========================================
+node_modules/
+**/node_modules/
+dist/
+**/dist/
+.angular/
+**/.angular/
+.npm/
+.yarn/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# ==========================================
+# IDE & Code Editor Files
+# ==========================================
+# IntelliJ IDEA
 .idea/
 *.iml
+*.iws
+*.ipr
+out/
+
+# Eclipse
+.metadata/
 .project
 .classpath
 .settings/
+*.launch
+bin/
+
+# Visual Studio Code
+.vscode/
+*.code-workspace
+
+# NetBeans
+nbproject/private/
+build/
+nbbuild/
+dist/
+nbdist/
+
+# ==========================================
+# Operating System & Temporary Files
+# ==========================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+[Dd]esktop.ini
+$RECYCLE.BIN/
+
+# Temporary and Scratch Directories
+tmp/
+temp/
+scratch/
+.tmp/
+
+# ==========================================
+# Environment Variables & Secrets
+# ==========================================
+.env
+.env.local
+.env.*.local
+*.env

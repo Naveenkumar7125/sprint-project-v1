@@ -1,6 +1,6 @@
 package com.eshoppingzone.inventory.controller;
 
-import com.eshoppingzone.common.dto.inventory.*;
+import com.eshoppingzone.inventory.dto.*;
 import com.eshoppingzone.inventory.service.InventoryService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;

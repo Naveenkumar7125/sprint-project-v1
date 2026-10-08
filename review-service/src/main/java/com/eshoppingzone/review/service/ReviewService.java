@@ -1,10 +1,10 @@
 package com.eshoppingzone.review.service;
 
-import com.eshoppingzone.common.dto.review.ProductReviewSummaryDto;
-import com.eshoppingzone.common.dto.review.ReviewCreateRequest;
-import com.eshoppingzone.common.dto.review.ReviewDto;
-import com.eshoppingzone.common.dto.review.ReviewUpdateRequest;
-import com.eshoppingzone.common.enums.UserRole;
+import com.eshoppingzone.review.dto.ProductReviewSummaryDto;
+import com.eshoppingzone.review.dto.ReviewCreateRequest;
+import com.eshoppingzone.review.dto.ReviewDto;
+import com.eshoppingzone.review.dto.ReviewUpdateRequest;
+import com.eshoppingzone.review.enums.UserRole;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 

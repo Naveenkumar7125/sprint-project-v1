@@ -1,7 +1,7 @@
 package com.eshoppingzone.notification.service.impl;
 
-import com.eshoppingzone.common.enums.NotificationChannel;
-import com.eshoppingzone.common.enums.NotificationStatus;
+import com.eshoppingzone.notification.enums.NotificationChannel;
+import com.eshoppingzone.notification.enums.NotificationStatus;
 import com.eshoppingzone.notification.dto.NotificationDto;
 import com.eshoppingzone.notification.dto.SendNotificationRequest;
 import com.eshoppingzone.notification.entity.Notification;

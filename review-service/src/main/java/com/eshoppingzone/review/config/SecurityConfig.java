@@ -1,7 +1,7 @@
 package com.eshoppingzone.review.config;
 
-import com.eshoppingzone.common.security.JwtAuthenticationFilter;
-import com.eshoppingzone.common.security.JwtUtils;
+import com.eshoppingzone.review.security.JwtAuthenticationFilter;
+import com.eshoppingzone.review.security.JwtUtils;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;

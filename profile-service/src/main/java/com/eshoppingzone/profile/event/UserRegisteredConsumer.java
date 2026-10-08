@@ -1,6 +1,6 @@
 package com.eshoppingzone.profile.event;
 
-import com.eshoppingzone.common.event.UserRegisteredEvent;
+import com.eshoppingzone.profile.event.UserRegisteredEvent;
 import com.eshoppingzone.profile.entity.UserProfile;
 import com.eshoppingzone.profile.repository.UserProfileRepository;
 import org.slf4j.Logger;

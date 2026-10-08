@@ -1,6 +1,6 @@
 package com.eshoppingzone.inventory.service;
 
-import com.eshoppingzone.common.dto.inventory.*;
+import com.eshoppingzone.inventory.dto.*;
 
 public interface InventoryService {
 

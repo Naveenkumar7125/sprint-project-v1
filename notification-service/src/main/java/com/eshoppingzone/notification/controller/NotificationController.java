@@ -1,7 +1,7 @@
 package com.eshoppingzone.notification.controller;
 
-import com.eshoppingzone.common.enums.NotificationStatus;
-import com.eshoppingzone.common.security.SecurityUtils;
+import com.eshoppingzone.notification.enums.NotificationStatus;
+import com.eshoppingzone.notification.security.SecurityUtils;
 import com.eshoppingzone.notification.dto.NotificationDto;
 import com.eshoppingzone.notification.dto.SendNotificationRequest;
 import com.eshoppingzone.notification.service.NotificationService;
@@ -29,8 +29,7 @@ public class NotificationController {
     private final NotificationService notificationService;
 
     @PostMapping("/send")
-    @PreAuthorize("hasRole('ADMIN')")
-    @Operation(summary = "Manually trigger a notification to a specific email/user (Admin only)")
+    @Operation(summary = "Trigger a notification to a specific email/user")
     public ResponseEntity<NotificationDto> sendNotification(@Valid @RequestBody SendNotificationRequest request) {
         NotificationDto notification = notificationService.sendNotification(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(notification);
@@ -55,4 +54,5 @@ public class NotificationController {
         Page<NotificationDto> notifications = notificationService.getAllNotifications(status, pageable);
         return ResponseEntity.ok(notifications);
     }
+    
 }

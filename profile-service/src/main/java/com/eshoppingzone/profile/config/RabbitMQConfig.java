@@ -22,7 +22,9 @@ public class RabbitMQConfig {
 
     @Bean
     public MessageConverter jsonMessageConverter() {
-        return new Jackson2JsonMessageConverter();
+        Jackson2JsonMessageConverter converter = new Jackson2JsonMessageConverter();
+        converter.setAlwaysConvertToInferredType(true);
+        return converter;
     }
 
     @Bean

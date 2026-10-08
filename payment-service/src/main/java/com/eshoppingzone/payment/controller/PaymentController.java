@@ -1,7 +1,7 @@
 package com.eshoppingzone.payment.controller;
 
-import com.eshoppingzone.common.dto.payment.*;
-import com.eshoppingzone.common.security.SecurityUtils;
+import com.eshoppingzone.payment.dto.*;
+import com.eshoppingzone.payment.security.SecurityUtils;
 import com.eshoppingzone.payment.service.PaymentService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;

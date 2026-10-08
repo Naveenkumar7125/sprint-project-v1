@@ -32,7 +32,6 @@
     </properties>
 
     <modules>
-        <module>common-library</module>
         <module>eureka-server</module>
         <module>config-server</module>
         <module>api-gateway</module>
@@ -59,13 +58,6 @@
                 <version>${spring-cloud.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
-            </dependency>
-
-            <!-- Common Library -->
-            <dependency>
-                <groupId>com.eshoppingzone</groupId>
-                <artifactId>common-library</artifactId>
-                <version>${project.version}</version>
             </dependency>
 
             <!-- JJWT for JWT Auth -->

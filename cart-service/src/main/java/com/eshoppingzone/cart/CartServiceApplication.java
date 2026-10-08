@@ -9,7 +9,7 @@ import org.springframework.context.annotation.ComponentScan;
 @SpringBootApplication
 @EnableDiscoveryClient
 @EnableFeignClients
-@ComponentScan(basePackages = {"com.eshoppingzone.cart", "com.eshoppingzone.common"})
+@ComponentScan(basePackages = {"com.eshoppingzone.cart"})
 public class CartServiceApplication {
     public static void main(String[] args) {
         SpringApplication.run(CartServiceApplication.class, args);

@@ -1,7 +1,7 @@
 package com.eshoppingzone.wallet.controller;
 
-import com.eshoppingzone.common.dto.wallet.*;
-import com.eshoppingzone.common.security.SecurityUtils;
+import com.eshoppingzone.wallet.dto.*;
+import com.eshoppingzone.wallet.security.SecurityUtils;
 import com.eshoppingzone.wallet.service.WalletService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -28,7 +28,7 @@ public class WalletController {
         this.walletService = walletService;
     }
 
-    @GetMapping
+    @GetMapping({"", "/me"})
     @SecurityRequirement(name = "BearerAuth")
     @Operation(summary = "Get current authenticated user's wallet details")
     public ResponseEntity<WalletDto> getWallet() {
@@ -50,7 +50,7 @@ public class WalletController {
         ));
     }
 
-    @PostMapping("/top-up")
+    @PostMapping({"/top-up", "/topup"})
     @SecurityRequirement(name = "BearerAuth")
     @Operation(summary = "Top-up wallet balance with idempotency key")
     public ResponseEntity<WalletDto> topUp(@Valid @RequestBody WalletTopUpRequest request) {

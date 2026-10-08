@@ -1,6 +1,6 @@
 package com.eshoppingzone.notification.repository;
 
-import com.eshoppingzone.common.enums.NotificationStatus;
+import com.eshoppingzone.notification.enums.NotificationStatus;
 import com.eshoppingzone.notification.entity.Notification;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

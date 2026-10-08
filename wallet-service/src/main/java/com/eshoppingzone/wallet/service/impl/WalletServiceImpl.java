@@ -1,13 +1,13 @@
 package com.eshoppingzone.wallet.service.impl;
 
-import com.eshoppingzone.common.dto.wallet.*;
-import com.eshoppingzone.common.enums.TransactionStatus;
-import com.eshoppingzone.common.enums.TransactionType;
-import com.eshoppingzone.common.enums.UserRole;
-import com.eshoppingzone.common.enums.WalletStatus;
-import com.eshoppingzone.common.exception.ConflictException;
-import com.eshoppingzone.common.exception.InsufficientBalanceException;
-import com.eshoppingzone.common.exception.ResourceNotFoundException;
+import com.eshoppingzone.wallet.dto.*;
+import com.eshoppingzone.wallet.enums.TransactionStatus;
+import com.eshoppingzone.wallet.enums.TransactionType;
+import com.eshoppingzone.wallet.enums.UserRole;
+import com.eshoppingzone.wallet.enums.WalletStatus;
+import com.eshoppingzone.wallet.exception.ConflictException;
+import com.eshoppingzone.wallet.exception.InsufficientBalanceException;
+import com.eshoppingzone.wallet.exception.ResourceNotFoundException;
 import com.eshoppingzone.wallet.entity.Wallet;
 import com.eshoppingzone.wallet.entity.WalletTransaction;
 import com.eshoppingzone.wallet.repository.WalletRepository;
@@ -41,16 +41,16 @@ public class WalletServiceImpl implements WalletService {
     }
 
     @Override
+    @Transactional
     public WalletDto getWallet(Long userId) {
         Wallet wallet = getOrCreateWallet(userId, UserRole.CUSTOMER);
         return mapToDto(wallet);
     }
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public BigDecimal getBalance(Long userId) {
-        Wallet wallet = walletRepository.findByUserId(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("Wallet not found for userId: " + userId));
+        Wallet wallet = getOrCreateWallet(userId, UserRole.CUSTOMER);
         return wallet.getBalance();
     }
 
@@ -62,7 +62,9 @@ public class WalletServiceImpl implements WalletService {
         }
 
         Wallet wallet = getOrCreateWallet(userId, UserRole.CUSTOMER);
-        wallet.setBalance(wallet.getBalance().add(request.getAmount()));
+        BigDecimal newBal = wallet.getBalance().add(request.getAmount());
+        wallet.setBalance(newBal);
+        wallet.setAvailableBalance(newBal);
         Wallet saved = walletRepository.save(wallet);
 
         WalletTransaction tx = WalletTransaction.builder()
@@ -102,6 +104,7 @@ public class WalletServiceImpl implements WalletService {
     public InternalWalletTransferResponse transferCustomerToAdmin(InternalWalletTransferRequest request) {
         String customerTxRef = request.getTransactionReference() + "-CUST-DEBIT";
         String adminTxRef = request.getTransactionReference() + "-ADMIN-CREDIT";
+        String merchantTxRef = request.getTransactionReference() + "-MERCHANT-CREDIT";
 
         // Idempotency check
         Optional<WalletTransaction> existingTx = transactionRepository.findByTransactionReference(customerTxRef);
@@ -132,16 +135,29 @@ public class WalletServiceImpl implements WalletService {
             throw new InsufficientBalanceException("Insufficient balance in customer wallet. Available: " + customerWallet.getBalance());
         }
 
-        Wallet adminWallet = getOrCreateAdminWallet();
+        // Calculate 10% Admin Platform share and 90% Merchant Share
+        BigDecimal adminShare = request.getAmount().multiply(new BigDecimal("0.10")).setScale(2, java.math.RoundingMode.HALF_UP);
+        BigDecimal merchantShare = request.getAmount().subtract(adminShare).setScale(2, java.math.RoundingMode.HALF_UP);
 
-        // Atomic financial mutation: Customer DEBIT + Admin CREDIT
+        Wallet adminWallet = getOrCreateAdminWallet();
+        Wallet merchantWallet = getOrCreateMerchantWallet(request.getMerchantId());
+
+        // Atomic financial mutation: Customer DEBIT (100%), Admin CREDIT (10%), Merchant CREDIT (90%)
         customerWallet.setBalance(customerWallet.getBalance().subtract(request.getAmount()));
-        adminWallet.setBalance(adminWallet.getBalance().add(request.getAmount()));
+        customerWallet.setAvailableBalance(customerWallet.getBalance());
+
+        adminWallet.setBalance(adminWallet.getBalance().add(adminShare));
+        adminWallet.setAvailableBalance(adminWallet.getBalance());
+
+        merchantWallet.setBalance(merchantWallet.getBalance().add(merchantShare));
+        BigDecimal currentMerchantAvailable = merchantWallet.getAvailableBalance() != null ? merchantWallet.getAvailableBalance() : BigDecimal.ZERO;
+        merchantWallet.setAvailableBalance(currentMerchantAvailable.add(merchantShare));
 
         Wallet savedCustomerWallet = walletRepository.save(customerWallet);
         Wallet savedAdminWallet = walletRepository.save(adminWallet);
+        Wallet savedMerchantWallet = walletRepository.save(merchantWallet);
 
-        // Record customer debit transaction
+        // Record customer debit transaction (100%)
         WalletTransaction custTx = WalletTransaction.builder()
                 .transactionReference(customerTxRef)
                 .wallet(savedCustomerWallet)
@@ -152,34 +168,49 @@ public class WalletServiceImpl implements WalletService {
                 .status(TransactionStatus.SUCCESS)
                 .description("Order Payment for order: " + request.getOrderId())
                 .sourceParty("CUSTOMER_WALLET_" + request.getCustomerUserId())
-                .destinationParty("ADMIN_WALLET")
+                .destinationParty("ADMIN (10%) & MERCHANT (90%)")
                 .build();
         transactionRepository.save(custTx);
 
-        // Record admin credit transaction
+        // Record admin credit transaction (10%)
         WalletTransaction adminTx = WalletTransaction.builder()
                 .transactionReference(adminTxRef)
                 .wallet(savedAdminWallet)
                 .userId(adminWallet.getUserId())
                 .transactionType(TransactionType.CREDIT)
-                .amount(request.getAmount())
+                .amount(adminShare)
                 .balanceAfter(savedAdminWallet.getBalance())
                 .status(TransactionStatus.SUCCESS)
-                .description("Order Payment received for order: " + request.getOrderId())
+                .description("Platform fee (10%) for order: " + request.getOrderId())
                 .sourceParty("CUSTOMER_WALLET_" + request.getCustomerUserId())
                 .destinationParty("ADMIN_WALLET")
                 .build();
         transactionRepository.save(adminTx);
 
-        log.info("Atomic transfer SUCCESS: Customer {} debited {}, new balance {}; Admin credited {}, new balance {}",
-                request.getCustomerUserId(), request.getAmount(), savedCustomerWallet.getBalance(), request.getAmount(), savedAdminWallet.getBalance());
+        // Record merchant credit transaction (90%)
+        WalletTransaction merchantTx = WalletTransaction.builder()
+                .transactionReference(merchantTxRef)
+                .wallet(savedMerchantWallet)
+                .userId(savedMerchantWallet.getUserId())
+                .transactionType(TransactionType.CREDIT)
+                .amount(merchantShare)
+                .balanceAfter(savedMerchantWallet.getBalance())
+                .status(TransactionStatus.SUCCESS)
+                .description("Merchant earnings (90%) for order: " + request.getOrderId())
+                .sourceParty("CUSTOMER_WALLET_" + request.getCustomerUserId())
+                .destinationParty("MERCHANT_WALLET_" + savedMerchantWallet.getUserId())
+                .build();
+        transactionRepository.save(merchantTx);
+
+        log.info("Atomic transfer SUCCESS: Customer {} debited {}, Admin credited {} (10%), Merchant {} credited {} (90%)",
+                request.getCustomerUserId(), request.getAmount(), adminShare, savedMerchantWallet.getUserId(), merchantShare);
 
         return InternalWalletTransferResponse.builder()
                 .successful(true)
                 .transactionReference(request.getTransactionReference())
                 .amount(request.getAmount())
                 .status(TransactionStatus.SUCCESS)
-                .message("Transfer completed successfully")
+                .message("Transfer completed successfully (10% Admin, 90% Merchant)")
                 .customerRemainingBalance(savedCustomerWallet.getBalance())
                 .processedAt(Instant.now())
                 .build();
@@ -272,6 +303,8 @@ public class WalletServiceImpl implements WalletService {
                             .userId(userId)
                             .role(role)
                             .balance(BigDecimal.ZERO)
+                            .pendingBalance(BigDecimal.ZERO)
+                            .availableBalance(BigDecimal.ZERO)
                             .currency("INR")
                             .status(WalletStatus.ACTIVE)
                             .build();
@@ -292,6 +325,8 @@ public class WalletServiceImpl implements WalletService {
                             .userId(0L)
                             .role(UserRole.ADMIN)
                             .balance(new BigDecimal("1000000.00")) // Initial balance for admin settlement
+                            .pendingBalance(BigDecimal.ZERO)
+                            .availableBalance(new BigDecimal("1000000.00"))
                             .currency("INR")
                             .status(WalletStatus.ACTIVE)
                             .build();
@@ -299,12 +334,58 @@ public class WalletServiceImpl implements WalletService {
                 });
     }
 
+    private Wallet getOrCreateMerchantWallet(Long merchantId) {
+        if (merchantId != null) {
+            return walletRepository.findByUserId(merchantId)
+                    .orElseGet(() -> {
+                        Wallet w = Wallet.builder()
+                                .userId(merchantId)
+                                .role(UserRole.MERCHANT)
+                                .balance(BigDecimal.ZERO)
+                                .pendingBalance(BigDecimal.ZERO)
+                                .availableBalance(BigDecimal.ZERO)
+                                .currency("INR")
+                                .status(WalletStatus.ACTIVE)
+                                .build();
+                        return walletRepository.save(w);
+                    });
+        }
+
+        List<Wallet> merchants = walletRepository.findByRole(UserRole.MERCHANT);
+        if (!merchants.isEmpty()) {
+            return merchants.get(0);
+        }
+
+        // Fallback default merchant ID 2 (merchant_bob)
+        return walletRepository.findByUserId(2L)
+                .orElseGet(() -> {
+                    Wallet w = Wallet.builder()
+                            .userId(2L)
+                            .role(UserRole.MERCHANT)
+                            .balance(BigDecimal.ZERO)
+                            .pendingBalance(BigDecimal.ZERO)
+                            .availableBalance(BigDecimal.ZERO)
+                            .currency("INR")
+                            .status(WalletStatus.ACTIVE)
+                            .build();
+                    return walletRepository.save(w);
+                });
+    }
+
+
     private WalletDto mapToDto(Wallet wallet) {
+        BigDecimal pending = wallet.getPendingBalance() != null ? wallet.getPendingBalance() : BigDecimal.ZERO;
+        BigDecimal available = wallet.getAvailableBalance() != null ? wallet.getAvailableBalance() : (wallet.getBalance() != null ? wallet.getBalance() : BigDecimal.ZERO);
+        BigDecimal primaryBal = wallet.getBalance() != null ? wallet.getBalance() : available;
+
         return WalletDto.builder()
                 .id(wallet.getId())
                 .userId(wallet.getUserId())
                 .role(wallet.getRole())
-                .balance(wallet.getBalance())
+                .balance(primaryBal)
+                .pendingBalance(pending)
+                .availableBalance(available)
+                .totalEarnings(available)
                 .currency(wallet.getCurrency())
                 .status(wallet.getStatus())
                 .version(wallet.getVersion())

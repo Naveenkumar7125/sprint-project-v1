@@ -1,11 +1,11 @@
 package com.eshoppingzone.product.controller;
 
-import com.eshoppingzone.common.dto.product.CategoryDto;
-import com.eshoppingzone.common.dto.product.ProductCreateRequest;
-import com.eshoppingzone.common.dto.product.ProductDto;
-import com.eshoppingzone.common.dto.product.ProductUpdateRequest;
-import com.eshoppingzone.common.enums.UserRole;
-import com.eshoppingzone.common.security.SecurityUtils;
+import com.eshoppingzone.product.dto.CategoryDto;
+import com.eshoppingzone.product.dto.ProductCreateRequest;
+import com.eshoppingzone.product.dto.ProductDto;
+import com.eshoppingzone.product.dto.ProductUpdateRequest;
+import com.eshoppingzone.product.enums.UserRole;
+import com.eshoppingzone.product.security.SecurityUtils;
 import com.eshoppingzone.product.service.ProductService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -77,6 +77,24 @@ public class ProductController {
     public ResponseEntity<CategoryDto> createCategory(@Valid @RequestBody CategoryDto categoryDto) {
         CategoryDto created = productService.createCategory(categoryDto);
         return new ResponseEntity<>(created, HttpStatus.CREATED);
+    }
+
+    @PutMapping("/categories/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    @SecurityRequirement(name = "BearerAuth")
+    @Operation(summary = "Update an existing product category (ADMIN only)")
+    public ResponseEntity<CategoryDto> updateCategory(@PathVariable Long id, @Valid @RequestBody CategoryDto categoryDto) {
+        CategoryDto updated = productService.updateCategory(id, categoryDto);
+        return ResponseEntity.ok(updated);
+    }
+
+    @DeleteMapping("/categories/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    @SecurityRequirement(name = "BearerAuth")
+    @Operation(summary = "Delete a product category (ADMIN only)")
+    public ResponseEntity<Void> deleteCategory(@PathVariable Long id) {
+        productService.deleteCategory(id);
+        return ResponseEntity.noContent().build();
     }
 
     @PostMapping

@@ -1,6 +1,6 @@
 package com.eshoppingzone.notification.dto;
 
-import com.eshoppingzone.common.enums.NotificationChannel;
+import com.eshoppingzone.notification.enums.NotificationChannel;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;

@@ -1,9 +1,9 @@
 package com.eshoppingzone.order.client;
 
-import com.eshoppingzone.common.dto.inventory.StockConfirmRequest;
-import com.eshoppingzone.common.dto.inventory.StockReleaseRequest;
-import com.eshoppingzone.common.dto.inventory.StockReservationRequest;
-import com.eshoppingzone.common.dto.inventory.StockReservationResponse;
+import com.eshoppingzone.order.dto.StockConfirmRequest;
+import com.eshoppingzone.order.dto.StockReleaseRequest;
+import com.eshoppingzone.order.dto.StockReservationRequest;
+import com.eshoppingzone.order.dto.StockReservationResponse;
 import org.springframework.stereotype.Component;
 
 @Component

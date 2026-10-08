@@ -1,10 +1,11 @@
 package com.eshoppingzone.notification.service;
 
-import com.eshoppingzone.common.enums.NotificationChannel;
-import com.eshoppingzone.common.enums.NotificationStatus;
-import com.eshoppingzone.common.event.OrderConfirmedEvent;
-import com.eshoppingzone.common.event.PasswordResetRequestedEvent;
-import com.eshoppingzone.common.event.UserRegisteredEvent;
+import com.eshoppingzone.notification.enums.NotificationChannel;
+import com.eshoppingzone.notification.enums.NotificationStatus;
+import com.eshoppingzone.notification.enums.UserRole;
+import com.eshoppingzone.notification.event.OrderConfirmedEvent;
+import com.eshoppingzone.notification.event.PasswordResetRequestedEvent;
+import com.eshoppingzone.notification.event.UserRegisteredEvent;
 import com.eshoppingzone.notification.consumer.NotificationConsumer;
 import com.eshoppingzone.notification.dto.NotificationDto;
 import com.eshoppingzone.notification.dto.SendNotificationRequest;
@@ -101,7 +102,7 @@ class NotificationServiceTest {
                 .userId(1L)
                 .username("john")
                 .email("john@example.com")
-                .role(com.eshoppingzone.common.enums.UserRole.CUSTOMER)
+                .role(UserRole.CUSTOMER)
                 .build();
 
         consumer.handleUserRegistered(event);

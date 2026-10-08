@@ -18,9 +18,20 @@
     <description>Product Catalogue and Category Management Service for EShopping Zone</description>
 
     <dependencies>
+        <!-- JJWT for JWT Auth -->
         <dependency>
-            <groupId>com.eshoppingzone</groupId>
-            <artifactId>common-library</artifactId>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-impl</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-jackson</artifactId>
+            <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>

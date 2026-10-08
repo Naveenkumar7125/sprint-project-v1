@@ -1,7 +1,7 @@
 package com.eshoppingzone.wallet.entity;
 
-import com.eshoppingzone.common.enums.TransactionStatus;
-import com.eshoppingzone.common.enums.TransactionType;
+import com.eshoppingzone.wallet.enums.TransactionStatus;
+import com.eshoppingzone.wallet.enums.TransactionType;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;

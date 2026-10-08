@@ -1,13 +1,13 @@
 package com.eshoppingzone.recommendation.service.impl;
 
-import com.eshoppingzone.common.dto.product.ProductDto;
-import com.eshoppingzone.common.dto.recommendation.FrequentlyPurchasedTogetherDto;
-import com.eshoppingzone.common.dto.recommendation.ProductRecommendationDto;
-import com.eshoppingzone.common.dto.recommendation.SearchEventRequest;
-import com.eshoppingzone.common.dto.recommendation.UserCategoryPreferenceDto;
-import com.eshoppingzone.common.dto.review.ProductReviewSummaryDto;
-import com.eshoppingzone.common.event.OrderConfirmedEvent;
-import com.eshoppingzone.common.event.ProductSearchedEvent;
+import com.eshoppingzone.recommendation.dto.ProductDto;
+import com.eshoppingzone.recommendation.dto.FrequentlyPurchasedTogetherDto;
+import com.eshoppingzone.recommendation.dto.ProductRecommendationDto;
+import com.eshoppingzone.recommendation.dto.SearchEventRequest;
+import com.eshoppingzone.recommendation.dto.UserCategoryPreferenceDto;
+import com.eshoppingzone.recommendation.dto.ProductReviewSummaryDto;
+import com.eshoppingzone.recommendation.event.OrderConfirmedEvent;
+import com.eshoppingzone.recommendation.event.ProductSearchedEvent;
 import com.eshoppingzone.recommendation.client.ProductClient;
 import com.eshoppingzone.recommendation.client.ReviewClient;
 import com.eshoppingzone.recommendation.entity.ProductPairAssociation;
@@ -166,6 +166,26 @@ public class RecommendationServiceImpl implements RecommendationService {
                         .coPurchaseFrequency(count)
                         .averageRating(stat.getAverageRating())
                         .build());
+            }
+        }
+
+        if (items.isEmpty()) {
+            List<ProductStatistics> topStats = productStatisticsRepository.findTrending(PageRequest.of(0, limit + 3));
+            for (ProductStatistics stat : topStats) {
+                if (stat.getProductId().equals(productId)) continue;
+                ProductDto product = fetchProductDetails(stat.getProductId());
+                if (product != null) {
+                    items.add(FrequentlyPurchasedTogetherDto.RecommendedItem.builder()
+                            .productId(product.getId())
+                            .name(product.getName())
+                            .price(product.getPrice())
+                            .imageUrl(product.getImageUrl())
+                            .categoryName(product.getCategoryName())
+                            .coPurchaseFrequency(Math.max(1L, stat.getPurchaseCount()))
+                            .averageRating(stat.getAverageRating() != null ? stat.getAverageRating() : 0.0)
+                            .build());
+                }
+                if (items.size() >= limit) break;
             }
         }
 

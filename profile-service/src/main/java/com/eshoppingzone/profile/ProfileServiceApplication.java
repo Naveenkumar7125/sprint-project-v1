@@ -7,7 +7,7 @@ import org.springframework.context.annotation.ComponentScan;
 
 @SpringBootApplication
 @EnableDiscoveryClient
-@ComponentScan(basePackages = {"com.eshoppingzone.profile", "com.eshoppingzone.common"})
+@ComponentScan(basePackages = {"com.eshoppingzone.profile"})
 public class ProfileServiceApplication {
     public static void main(String[] args) {
         SpringApplication.run(ProfileServiceApplication.class, args);

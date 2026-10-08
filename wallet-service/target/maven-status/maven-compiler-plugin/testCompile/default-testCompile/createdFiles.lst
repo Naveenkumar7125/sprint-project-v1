@@ -1,0 +1,3 @@
+com\eshoppingzone\wallet\controller\MerchantWalletControllerTest.class
+com\eshoppingzone\wallet\service\SettlementServiceTest.class
+com\eshoppingzone\wallet\service\WalletServiceTest.class

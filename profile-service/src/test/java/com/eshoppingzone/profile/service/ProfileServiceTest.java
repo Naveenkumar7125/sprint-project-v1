@@ -1,9 +1,9 @@
 package com.eshoppingzone.profile.service;
 
-import com.eshoppingzone.common.dto.profile.AddressDto;
-import com.eshoppingzone.common.dto.profile.UpdateProfileRequest;
-import com.eshoppingzone.common.dto.profile.UserProfileDto;
-import com.eshoppingzone.common.exception.ResourceNotFoundException;
+import com.eshoppingzone.profile.dto.AddressDto;
+import com.eshoppingzone.profile.dto.UpdateProfileRequest;
+import com.eshoppingzone.profile.dto.UserProfileDto;
+import com.eshoppingzone.profile.exception.ResourceNotFoundException;
 import com.eshoppingzone.profile.entity.Address;
 import com.eshoppingzone.profile.entity.UserProfile;
 import com.eshoppingzone.profile.repository.AddressRepository;

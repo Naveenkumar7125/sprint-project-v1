@@ -1,10 +1,10 @@
 package com.eshoppingzone.cart.controller;
 
 import com.eshoppingzone.cart.service.CartService;
-import com.eshoppingzone.common.dto.cart.AddToCartRequest;
-import com.eshoppingzone.common.dto.cart.CartDto;
-import com.eshoppingzone.common.dto.cart.UpdateCartItemRequest;
-import com.eshoppingzone.common.security.SecurityUtils;
+import com.eshoppingzone.cart.dto.AddToCartRequest;
+import com.eshoppingzone.cart.dto.CartDto;
+import com.eshoppingzone.cart.dto.UpdateCartItemRequest;
+import com.eshoppingzone.cart.security.SecurityUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;

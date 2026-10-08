@@ -1,7 +1,7 @@
 package com.eshoppingzone.payment.client;
 
-import com.eshoppingzone.common.dto.wallet.InternalWalletTransferRequest;
-import com.eshoppingzone.common.dto.wallet.InternalWalletTransferResponse;
+import com.eshoppingzone.payment.dto.InternalWalletTransferRequest;
+import com.eshoppingzone.payment.dto.InternalWalletTransferResponse;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;

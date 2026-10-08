@@ -1,0 +1,2 @@
+ALTER TABLE products MODIFY COLUMN image_url LONGTEXT NULL;
+ALTER TABLE product_specifications MODIFY COLUMN spec_value LONGTEXT NOT NULL;

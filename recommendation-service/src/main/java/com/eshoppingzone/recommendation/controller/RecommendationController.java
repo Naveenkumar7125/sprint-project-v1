@@ -1,10 +1,10 @@
 package com.eshoppingzone.recommendation.controller;
 
-import com.eshoppingzone.common.dto.recommendation.FrequentlyPurchasedTogetherDto;
-import com.eshoppingzone.common.dto.recommendation.ProductRecommendationDto;
-import com.eshoppingzone.common.dto.recommendation.SearchEventRequest;
-import com.eshoppingzone.common.dto.recommendation.UserCategoryPreferenceDto;
-import com.eshoppingzone.common.security.SecurityUtils;
+import com.eshoppingzone.recommendation.dto.FrequentlyPurchasedTogetherDto;
+import com.eshoppingzone.recommendation.dto.ProductRecommendationDto;
+import com.eshoppingzone.recommendation.dto.SearchEventRequest;
+import com.eshoppingzone.recommendation.dto.UserCategoryPreferenceDto;
+import com.eshoppingzone.recommendation.security.SecurityUtils;
 import com.eshoppingzone.recommendation.service.RecommendationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;

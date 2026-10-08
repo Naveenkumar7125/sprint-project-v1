@@ -21,4 +21,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     boolean existsByUsername(String username);
 
     boolean existsByEmail(String email);
+
+    java.util.List<User> findByRoleAndEnabledTrue(com.eshoppingzone.auth.enums.UserRole role);
 }

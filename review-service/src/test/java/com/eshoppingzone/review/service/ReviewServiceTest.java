@@ -1,15 +1,15 @@
 package com.eshoppingzone.review.service;
 
-import com.eshoppingzone.common.dto.order.OrderDto;
-import com.eshoppingzone.common.dto.order.OrderItemDto;
-import com.eshoppingzone.common.dto.review.ProductReviewSummaryDto;
-import com.eshoppingzone.common.dto.review.ReviewCreateRequest;
-import com.eshoppingzone.common.dto.review.ReviewDto;
-import com.eshoppingzone.common.dto.review.ReviewUpdateRequest;
-import com.eshoppingzone.common.enums.OrderStatus;
-import com.eshoppingzone.common.enums.UserRole;
-import com.eshoppingzone.common.exception.BadRequestException;
-import com.eshoppingzone.common.exception.ForbiddenException;
+import com.eshoppingzone.review.dto.OrderDto;
+import com.eshoppingzone.review.dto.OrderItemDto;
+import com.eshoppingzone.review.dto.ProductReviewSummaryDto;
+import com.eshoppingzone.review.dto.ReviewCreateRequest;
+import com.eshoppingzone.review.dto.ReviewDto;
+import com.eshoppingzone.review.dto.ReviewUpdateRequest;
+import com.eshoppingzone.review.enums.OrderStatus;
+import com.eshoppingzone.review.enums.UserRole;
+import com.eshoppingzone.review.exception.BadRequestException;
+import com.eshoppingzone.review.exception.ForbiddenException;
 import com.eshoppingzone.review.client.OrderClient;
 import com.eshoppingzone.review.entity.Review;
 import com.eshoppingzone.review.repository.ReviewRepository;

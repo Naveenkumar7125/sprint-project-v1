@@ -1,6 +1,6 @@
 package com.eshoppingzone.payment.event;
 
-import com.eshoppingzone.common.event.*;
+import com.eshoppingzone.payment.event.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;

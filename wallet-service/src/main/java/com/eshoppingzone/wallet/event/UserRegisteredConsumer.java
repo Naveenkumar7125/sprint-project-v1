@@ -1,8 +1,8 @@
 package com.eshoppingzone.wallet.event;
 
-import com.eshoppingzone.common.enums.UserRole;
-import com.eshoppingzone.common.enums.WalletStatus;
-import com.eshoppingzone.common.event.UserRegisteredEvent;
+import com.eshoppingzone.wallet.enums.UserRole;
+import com.eshoppingzone.wallet.enums.WalletStatus;
+import com.eshoppingzone.wallet.event.UserRegisteredEvent;
 import com.eshoppingzone.wallet.entity.Wallet;
 import com.eshoppingzone.wallet.repository.WalletRepository;
 import org.slf4j.Logger;

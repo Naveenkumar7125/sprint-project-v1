@@ -1,8 +1,8 @@
 package com.eshoppingzone.order.consumer;
 
-import com.eshoppingzone.common.enums.DeliveryStatus;
-import com.eshoppingzone.common.enums.OrderStatus;
-import com.eshoppingzone.common.event.DeliveryStatusChangedEvent;
+import com.eshoppingzone.order.enums.DeliveryStatus;
+import com.eshoppingzone.order.enums.OrderStatus;
+import com.eshoppingzone.order.event.DeliveryStatusChangedEvent;
 import com.eshoppingzone.order.config.RabbitMQConfig;
 import com.eshoppingzone.order.service.OrderService;
 import lombok.RequiredArgsConstructor;
@@ -28,7 +28,9 @@ public class DeliveryStatusChangedConsumer {
 
         if (event.getNewStatus() == DeliveryStatus.DELIVERED) {
             orderService.updateOrderStatusFromDelivery(event.getOrderId(), OrderStatus.DELIVERED);
-        } else if (event.getNewStatus() == DeliveryStatus.PICKED_UP || event.getNewStatus() == DeliveryStatus.OUT_FOR_DELIVERY) {
+        } else if (event.getNewStatus() == DeliveryStatus.OUT_FOR_DELIVERY) {
+            orderService.updateOrderStatusFromDelivery(event.getOrderId(), OrderStatus.OUT_FOR_DELIVERY);
+        } else if (event.getNewStatus() == DeliveryStatus.PICKED_UP) {
             orderService.updateOrderStatusFromDelivery(event.getOrderId(), OrderStatus.SHIPPED);
         } else if (event.getNewStatus() == DeliveryStatus.FAILED) {
             orderService.updateOrderStatusFromDelivery(event.getOrderId(), OrderStatus.CANCELLED);

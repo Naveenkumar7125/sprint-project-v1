@@ -1,8 +1,9 @@
 package com.eshoppingzone.auth.controller;
 
 import com.eshoppingzone.auth.service.AuthService;
-import com.eshoppingzone.common.dto.auth.*;
-import com.eshoppingzone.common.security.SecurityUtils;
+import com.eshoppingzone.auth.dto.*;
+import com.eshoppingzone.auth.enums.UserRole;
+import com.eshoppingzone.auth.security.SecurityUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -11,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -35,6 +37,13 @@ public class AuthController {
     @Operation(summary = "Authenticate user with username/email and password")
     public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
         AuthResponse response = authService.login(request);
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/social-login")
+    @Operation(summary = "Authenticate or auto-provision user via verified Google/GitHub OAuth profile")
+    public ResponseEntity<AuthResponse> socialLogin(@Valid @RequestBody SocialLoginRequest request) {
+        AuthResponse response = authService.socialLogin(request);
         return ResponseEntity.ok(response);
     }
 
@@ -86,5 +95,57 @@ public class AuthController {
         Long userId = SecurityUtils.getCurrentUserId();
         UserDto userDto = authService.getCurrentUser(userId);
         return ResponseEntity.ok(userDto);
+    }
+
+    @GetMapping("/agents")
+    @Operation(summary = "Get all active verified delivery agents")
+    public ResponseEntity<List<UserDto>> getDeliveryAgents() {
+        List<UserDto> agents = authService.getUsersByRole(UserRole.DELIVERY_AGENT);
+        return ResponseEntity.ok(agents);
+    }
+
+    @GetMapping("/users")
+    @Operation(summary = "Get all users, optionally filtered by role")
+    public ResponseEntity<List<UserDto>> getUsers(@RequestParam(required = false) UserRole role) {
+        if (role != null) {
+            return ResponseEntity.ok(authService.getUsersByRole(role));
+        }
+        return ResponseEntity.ok(authService.getAllUsers());
+    }
+
+    @PutMapping("/users/{userId}/role")
+    @Operation(summary = "Admin update user role")
+    public ResponseEntity<UserDto> updateUserRole(
+            @PathVariable Long userId,
+            @RequestParam UserRole role) {
+        UserDto updated = authService.updateUserRole(userId, role);
+        return ResponseEntity.ok(updated);
+    }
+
+    @PutMapping("/users/{userId}/status")
+    @Operation(summary = "Admin update user status and enabled flag")
+    public ResponseEntity<UserDto> updateUserStatus(
+            @PathVariable Long userId,
+            @RequestParam(required = false) com.eshoppingzone.auth.enums.AccountStatus status,
+            @RequestParam(required = false) Boolean enabled) {
+        UserDto updated = authService.updateUserStatus(userId, status, enabled);
+        return ResponseEntity.ok(updated);
+    }
+
+    @PutMapping("/users/{userId}/category")
+    @Operation(summary = "Admin assign or update merchant single category domain")
+    public ResponseEntity<UserDto> updateUserCategory(
+            @PathVariable Long userId,
+            @RequestParam Long categoryId,
+            @RequestParam String categoryName) {
+        UserDto updated = authService.updateUserCategory(userId, categoryId, categoryName);
+        return ResponseEntity.ok(updated);
+    }
+
+    @DeleteMapping("/users/{userId}")
+    @Operation(summary = "Admin delete user")
+    public ResponseEntity<Map<String, String>> deleteUser(@PathVariable Long userId) {
+        authService.deleteUser(userId);
+        return ResponseEntity.ok(Map.of("message", "User deleted successfully"));
     }
 }

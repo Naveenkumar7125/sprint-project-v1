@@ -5,7 +5,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 
-@SpringBootApplication(scanBasePackages = {"com.eshoppingzone.review", "com.eshoppingzone.common"})
+@SpringBootApplication(scanBasePackages = {"com.eshoppingzone.review"})
 @EnableDiscoveryClient
 @EnableFeignClients(basePackages = "com.eshoppingzone.review.client")
 public class ReviewServiceApplication {

@@ -1,9 +1,9 @@
 package com.eshoppingzone.product.service;
 
-import com.eshoppingzone.common.dto.product.CategoryDto;
-import com.eshoppingzone.common.dto.product.ProductCreateRequest;
-import com.eshoppingzone.common.dto.product.ProductDto;
-import com.eshoppingzone.common.dto.product.ProductUpdateRequest;
+import com.eshoppingzone.product.dto.CategoryDto;
+import com.eshoppingzone.product.dto.ProductCreateRequest;
+import com.eshoppingzone.product.dto.ProductDto;
+import com.eshoppingzone.product.dto.ProductUpdateRequest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -30,4 +30,8 @@ public interface ProductService {
     List<CategoryDto> getAllCategories();
 
     CategoryDto createCategory(CategoryDto categoryDto);
+
+    CategoryDto updateCategory(Long categoryId, CategoryDto categoryDto);
+
+    void deleteCategory(Long categoryId);
 }

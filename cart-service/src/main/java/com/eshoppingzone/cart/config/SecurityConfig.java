@@ -1,7 +1,7 @@
 package com.eshoppingzone.cart.config;
 
-import com.eshoppingzone.common.security.JwtAuthenticationFilter;
-import com.eshoppingzone.common.security.JwtUtils;
+import com.eshoppingzone.cart.security.JwtAuthenticationFilter;
+import com.eshoppingzone.cart.security.JwtUtils;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;

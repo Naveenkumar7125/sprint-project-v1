@@ -1,6 +1,6 @@
 package com.eshoppingzone.review.client;
 
-import com.eshoppingzone.common.dto.order.OrderDto;
+import com.eshoppingzone.review.dto.OrderDto;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.GetMapping;

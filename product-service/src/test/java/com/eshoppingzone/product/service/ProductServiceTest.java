@@ -1,9 +1,9 @@
 package com.eshoppingzone.product.service;
 
-import com.eshoppingzone.common.dto.product.ProductCreateRequest;
-import com.eshoppingzone.common.dto.product.ProductDto;
-import com.eshoppingzone.common.dto.product.ProductUpdateRequest;
-import com.eshoppingzone.common.exception.ForbiddenException;
+import com.eshoppingzone.product.dto.ProductCreateRequest;
+import com.eshoppingzone.product.dto.ProductDto;
+import com.eshoppingzone.product.dto.ProductUpdateRequest;
+import com.eshoppingzone.product.exception.ForbiddenException;
 import com.eshoppingzone.product.entity.Category;
 import com.eshoppingzone.product.entity.Product;
 import com.eshoppingzone.product.repository.CategoryRepository;

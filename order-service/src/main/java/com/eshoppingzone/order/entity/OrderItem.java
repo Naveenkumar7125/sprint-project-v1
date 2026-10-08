@@ -35,7 +35,7 @@ public class OrderItem {
     @Column(name = "product_name", nullable = false, length = 150)
     private String productName;
 
-    @Column(name = "product_image_url", length = 500)
+    @Column(name = "product_image_url", columnDefinition = "LONGTEXT")
     private String productImageUrl;
 
     @Column(name = "merchant_id")

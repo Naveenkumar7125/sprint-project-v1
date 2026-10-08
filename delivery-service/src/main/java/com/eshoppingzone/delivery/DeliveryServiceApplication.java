@@ -5,7 +5,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 
-@SpringBootApplication(scanBasePackages = {"com.eshoppingzone.delivery", "com.eshoppingzone.common"})
+@SpringBootApplication(scanBasePackages = {"com.eshoppingzone.delivery"})
 @EnableDiscoveryClient
 @EnableFeignClients
 public class DeliveryServiceApplication {

@@ -1,8 +1,8 @@
 package com.eshoppingzone.cart.service;
 
-import com.eshoppingzone.common.dto.cart.AddToCartRequest;
-import com.eshoppingzone.common.dto.cart.CartDto;
-import com.eshoppingzone.common.dto.cart.UpdateCartItemRequest;
+import com.eshoppingzone.cart.dto.AddToCartRequest;
+import com.eshoppingzone.cart.dto.CartDto;
+import com.eshoppingzone.cart.dto.UpdateCartItemRequest;
 
 import java.math.BigDecimal;
 

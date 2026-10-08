@@ -1,9 +1,9 @@
 package com.eshoppingzone.profile.service.impl;
 
-import com.eshoppingzone.common.dto.profile.AddressDto;
-import com.eshoppingzone.common.dto.profile.UpdateProfileRequest;
-import com.eshoppingzone.common.dto.profile.UserProfileDto;
-import com.eshoppingzone.common.exception.ResourceNotFoundException;
+import com.eshoppingzone.profile.dto.AddressDto;
+import com.eshoppingzone.profile.dto.UpdateProfileRequest;
+import com.eshoppingzone.profile.dto.UserProfileDto;
+import com.eshoppingzone.profile.exception.ResourceNotFoundException;
 import com.eshoppingzone.profile.entity.Address;
 import com.eshoppingzone.profile.entity.UserProfile;
 import com.eshoppingzone.profile.repository.AddressRepository;
@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -32,18 +33,31 @@ public class ProfileServiceImpl implements ProfileService {
     }
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public UserProfileDto getProfile(Long userId) {
         UserProfile profile = userProfileRepository.findByUserIdWithAddresses(userId)
                 .orElseGet(() -> userProfileRepository.findByUserId(userId)
-                        .orElseThrow(() -> new ResourceNotFoundException("User profile not found for userId: " + userId)));
+                        .orElseGet(() -> createDefaultProfile(userId)));
         return mapToProfileDto(profile);
+    }
+
+    private UserProfile createDefaultProfile(Long userId) {
+        log.info("Auto-provisioning default UserProfile for userId: {}", userId);
+        UserProfile newProfile = UserProfile.builder()
+                .userId(userId)
+                .username("user_" + userId)
+                .email("user" + userId + "@eshoppingzone.com")
+                .fullName("User " + userId)
+                .phoneNumber("")
+                .addresses(new ArrayList<>())
+                .build();
+        return userProfileRepository.save(newProfile);
     }
 
     @Override
     public UserProfileDto updateProfile(Long userId, UpdateProfileRequest request) {
         UserProfile profile = userProfileRepository.findByUserId(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("User profile not found for userId: " + userId));
+                .orElseGet(() -> createDefaultProfile(userId));
 
         if (request.getFullName() != null) {
             profile.setFullName(request.getFullName());
@@ -66,7 +80,7 @@ public class ProfileServiceImpl implements ProfileService {
     @Override
     public AddressDto addAddress(Long userId, AddressDto addressDto) {
         UserProfile profile = userProfileRepository.findByUserId(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("User profile not found for userId: " + userId));
+                .orElseGet(() -> createDefaultProfile(userId));
 
         long existingAddressesCount = addressRepository.countByProfileId(profile.getId());
         boolean shouldBeDefault = existingAddressesCount == 0 || Boolean.TRUE.equals(addressDto.getIsDefault());
@@ -95,7 +109,12 @@ public class ProfileServiceImpl implements ProfileService {
     @Transactional(readOnly = true)
     public List<AddressDto> getAddresses(Long userId) {
         UserProfile profile = userProfileRepository.findByUserId(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("User profile not found for userId: " + userId));
+                .orElseGet(() -> userProfileRepository.findByUserIdWithAddresses(userId)
+                        .orElse(null));
+
+        if (profile == null) {
+            return new ArrayList<>();
+        }
 
         return addressRepository.findByUserProfileId(profile.getId())
                 .stream()

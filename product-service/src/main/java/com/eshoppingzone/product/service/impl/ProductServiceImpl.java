@@ -1,12 +1,12 @@
 package com.eshoppingzone.product.service.impl;
 
-import com.eshoppingzone.common.dto.product.CategoryDto;
-import com.eshoppingzone.common.dto.product.ProductCreateRequest;
-import com.eshoppingzone.common.dto.product.ProductDto;
-import com.eshoppingzone.common.dto.product.ProductUpdateRequest;
-import com.eshoppingzone.common.exception.ConflictException;
-import com.eshoppingzone.common.exception.ForbiddenException;
-import com.eshoppingzone.common.exception.ResourceNotFoundException;
+import com.eshoppingzone.product.dto.CategoryDto;
+import com.eshoppingzone.product.dto.ProductCreateRequest;
+import com.eshoppingzone.product.dto.ProductDto;
+import com.eshoppingzone.product.dto.ProductUpdateRequest;
+import com.eshoppingzone.product.exception.ConflictException;
+import com.eshoppingzone.product.exception.ForbiddenException;
+import com.eshoppingzone.product.exception.ResourceNotFoundException;
 import com.eshoppingzone.product.entity.Category;
 import com.eshoppingzone.product.entity.Product;
 import com.eshoppingzone.product.repository.CategoryRepository;
@@ -23,7 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.eshoppingzone.common.event.ProductSearchedEvent;
+import com.eshoppingzone.product.event.ProductSearchedEvent;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;
 
@@ -43,13 +43,14 @@ public class ProductServiceImpl implements ProductService {
     @Value("${app.rabbitmq.exchange:eshoppingzone.exchange}")
     private String exchange;
 
-//    public ProductServiceImpl(ProductRepository productRepository, CategoryRepository categoryRepository) {
-//        this(productRepository, categoryRepository, null);
-//    }
+    public ProductServiceImpl(ProductRepository productRepository, CategoryRepository categoryRepository) {
+        this(productRepository, categoryRepository, null);
+    }
 
+    @org.springframework.beans.factory.annotation.Autowired
     public ProductServiceImpl(ProductRepository productRepository, 
                               CategoryRepository categoryRepository,
-                              RabbitTemplate rabbitTemplate) {
+                              @org.springframework.beans.factory.annotation.Autowired(required = false) RabbitTemplate rabbitTemplate) {
         this.productRepository = productRepository;
         this.categoryRepository = categoryRepository;
         this.rabbitTemplate = rabbitTemplate;
@@ -204,6 +205,40 @@ public class ProductServiceImpl implements ProductService {
         return mapToCategoryDto(saved);
     }
 
+    @Override
+    public CategoryDto updateCategory(Long categoryId, CategoryDto categoryDto) {
+        Category category = categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new ResourceNotFoundException("Category not found with id: " + categoryId));
+
+        if (!category.getName().equalsIgnoreCase(categoryDto.getName()) &&
+                categoryRepository.existsByNameIgnoreCase(categoryDto.getName())) {
+            throw new ConflictException("Category already exists with name: " + categoryDto.getName());
+        }
+
+        category.setName(categoryDto.getName());
+        if (categoryDto.getDescription() != null) {
+            category.setDescription(categoryDto.getDescription());
+        }
+
+        Category updated = categoryRepository.save(category);
+        log.info("Updated category id: {}, name: {}", updated.getId(), updated.getName());
+        return mapToCategoryDto(updated);
+    }
+
+    @Override
+    public void deleteCategory(Long categoryId) {
+        Category category = categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new ResourceNotFoundException("Category not found with id: " + categoryId));
+
+        long productCount = productRepository.countByCategoryId(categoryId);
+        if (productCount > 0) {
+            throw new ConflictException("Cannot delete category '" + category.getName() + "' because it has " + productCount + " products assigned to it. Please reassign or delete the products first.");
+        }
+
+        categoryRepository.delete(category);
+        log.info("Deleted category id: {}, name: {}", categoryId, category.getName());
+    }
+
     private void validateOwnership(Product product, Long merchantId, boolean isAdmin) {
         if (!isAdmin && !product.getMerchantId().equals(merchantId)) {
             throw new ForbiddenException("You do not have permission to modify this product");
@@ -228,10 +263,12 @@ public class ProductServiceImpl implements ProductService {
     }
 
     private CategoryDto mapToCategoryDto(Category category) {
+        long count = productRepository.countByCategoryId(category.getId());
         return CategoryDto.builder()
                 .id(category.getId())
                 .name(category.getName())
                 .description(category.getDescription())
+                .productCount(count)
                 .build();
     }
 }

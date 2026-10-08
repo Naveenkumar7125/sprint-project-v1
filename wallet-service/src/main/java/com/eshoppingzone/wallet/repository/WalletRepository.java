@@ -1,6 +1,6 @@
 package com.eshoppingzone.wallet.repository;
 
-import com.eshoppingzone.common.enums.UserRole;
+import com.eshoppingzone.wallet.enums.UserRole;
 import com.eshoppingzone.wallet.entity.Wallet;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

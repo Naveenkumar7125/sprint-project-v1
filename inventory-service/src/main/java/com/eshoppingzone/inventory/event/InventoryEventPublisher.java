@@ -1,7 +1,7 @@
 package com.eshoppingzone.inventory.event;
 
-import com.eshoppingzone.common.event.BaseEvent;
-import com.eshoppingzone.common.event.LowStockEvent;
+import com.eshoppingzone.inventory.event.BaseEvent;
+import com.eshoppingzone.inventory.event.LowStockEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;

@@ -1,9 +1,9 @@
 package com.eshoppingzone.inventory.service;
 
-import com.eshoppingzone.common.dto.inventory.StockConfirmRequest;
-import com.eshoppingzone.common.dto.inventory.StockReleaseRequest;
-import com.eshoppingzone.common.dto.inventory.StockReservationRequest;
-import com.eshoppingzone.common.dto.inventory.StockReservationResponse;
+import com.eshoppingzone.inventory.dto.StockConfirmRequest;
+import com.eshoppingzone.inventory.dto.StockReleaseRequest;
+import com.eshoppingzone.inventory.dto.StockReservationRequest;
+import com.eshoppingzone.inventory.dto.StockReservationResponse;
 import com.eshoppingzone.inventory.entity.Inventory;
 import com.eshoppingzone.inventory.event.InventoryEventPublisher;
 import com.eshoppingzone.inventory.repository.InventoryHistoryRepository;

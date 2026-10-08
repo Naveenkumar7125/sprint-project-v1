@@ -7,7 +7,7 @@ import org.springframework.context.annotation.ComponentScan;
 
 @SpringBootApplication
 @EnableDiscoveryClient
-@ComponentScan(basePackages = {"com.eshoppingzone.inventory", "com.eshoppingzone.common"})
+@ComponentScan(basePackages = {"com.eshoppingzone.inventory"})
 public class InventoryServiceApplication {
     public static void main(String[] args) {
         SpringApplication.run(InventoryServiceApplication.class, args);

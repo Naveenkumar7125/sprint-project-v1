@@ -1,6 +1,6 @@
 package com.eshoppingzone.payment.entity;
 
-import com.eshoppingzone.common.enums.RefundStatus;
+import com.eshoppingzone.payment.enums.RefundStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;

@@ -1,8 +1,8 @@
 package com.eshoppingzone.payment.client;
 
-import com.eshoppingzone.common.dto.wallet.InternalWalletTransferRequest;
-import com.eshoppingzone.common.dto.wallet.InternalWalletTransferResponse;
-import com.eshoppingzone.common.exception.PaymentFailedException;
+import com.eshoppingzone.payment.dto.InternalWalletTransferRequest;
+import com.eshoppingzone.payment.dto.InternalWalletTransferResponse;
+import com.eshoppingzone.payment.exception.PaymentFailedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;

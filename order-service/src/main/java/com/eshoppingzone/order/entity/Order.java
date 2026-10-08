@@ -1,7 +1,7 @@
 package com.eshoppingzone.order.entity;
 
-import com.eshoppingzone.common.enums.OrderStatus;
-import com.eshoppingzone.common.enums.PaymentMethod;
+import com.eshoppingzone.order.enums.OrderStatus;
+import com.eshoppingzone.order.enums.PaymentMethod;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;

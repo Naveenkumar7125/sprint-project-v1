@@ -1,11 +1,11 @@
 package com.eshoppingzone.review.controller;
 
-import com.eshoppingzone.common.dto.review.ProductReviewSummaryDto;
-import com.eshoppingzone.common.dto.review.ReviewCreateRequest;
-import com.eshoppingzone.common.dto.review.ReviewDto;
-import com.eshoppingzone.common.dto.review.ReviewUpdateRequest;
-import com.eshoppingzone.common.enums.UserRole;
-import com.eshoppingzone.common.security.SecurityUtils;
+import com.eshoppingzone.review.dto.ProductReviewSummaryDto;
+import com.eshoppingzone.review.dto.ReviewCreateRequest;
+import com.eshoppingzone.review.dto.ReviewDto;
+import com.eshoppingzone.review.dto.ReviewUpdateRequest;
+import com.eshoppingzone.review.enums.UserRole;
+import com.eshoppingzone.review.security.SecurityUtils;
 import com.eshoppingzone.review.service.ReviewService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -71,6 +71,7 @@ public class ReviewController {
         Page<ReviewDto> reviews = reviewService.getProductReviews(productId, pageable);
         return ResponseEntity.ok(reviews);
     }
+    
 
     @GetMapping("/product/{productId}/summary")
     @Operation(summary = "Get aggregate review summary and rating metrics for a product (Public)")
