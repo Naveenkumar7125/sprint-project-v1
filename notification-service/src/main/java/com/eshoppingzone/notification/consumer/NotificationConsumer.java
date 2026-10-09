@@ -252,36 +252,95 @@ public class NotificationConsumer {
 
     @RabbitListener(queues = RabbitMQConfig.DELIVERY_QUEUE)
     public void handleDeliveryStatusChanged(DeliveryStatusChangedEvent event) {
-        log.info("Processing DeliveryStatusChangedEvent for order ID: {}, Status: {}", event.getOrderId(), event.getNewStatus());
-        String subject = "Shipment Tracking Update: Order #" + event.getOrderId();
-        String content = String.format(
-            "<div style='font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif; max-width: 620px; margin: 0 auto; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; color: #1e293b;'>" +
-            "<div style='background: #0f172a; color: #ffffff; padding: 22px 24px; display: flex; justify-content: space-between; align-items: center;'>" +
-            "<div><div style='font-size: 20px; font-weight: 900;'>EShopping<span style='color: #818cf8;'>Zone</span></div><div style='font-size: 11px; color: #94a3b8;'>Live Logistics & Courier Dispatch Network</div></div>" +
-            "<div><span style='background: #e0f2fe; color: #0369a1; font-size: 11px; font-weight: 800; padding: 4px 10px; border-radius: 4px;'>%s</span></div>" +
-            "</div>" +
-            "<div style='padding: 24px;'>" +
-            "<div style='background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px; margin-bottom: 18px; font-size: 12px;'>" +
-            "<table style='width: 100%%; border-collapse: collapse;'>" +
-            "<tr style='border-bottom: 1px solid #e2e8f0;'><td style='padding: 6px 0; color: #64748b;'>Order Reference:</td><td style='padding: 6px 0; text-align: right; font-weight: 700; color: #0f172a;'>#%d</td></tr>" +
-            "<tr style='border-bottom: 1px solid #e2e8f0;'><td style='padding: 6px 0; color: #64748b;'>Waybill / Tracking No:</td><td style='padding: 6px 0; text-align: right; font-family: monospace; font-weight: 700; color: #0f172a;'>%s</td></tr>" +
-            "<tr style='border-bottom: 1px solid #e2e8f0;'><td style='padding: 6px 0; color: #64748b;'>Delivery Status:</td><td style='padding: 6px 0; text-align: right; font-weight: 700; color: #0369a1;'>%s</td></tr>" +
-            "<tr><td style='padding: 6px 0; color: #64748b;'>Logistics Remarks:</td><td style='padding: 6px 0; text-align: right; color: #475569;'>%s</td></tr>" +
-            "</table>" +
-            "</div>" +
-            "<div style='border-top: 1px solid #e2e8f0; padding-top: 12px; text-align: center; font-size: 11px; color: #64748b;'>" +
-            "EShopping Zone Logistics • tracking@eshoppingzone.com" +
-            "</div>" +
-            "</div>" +
-            "</div>",
-            event.getNewStatus() != null ? event.getNewStatus().toString() : "IN_TRANSIT",
-            event.getOrderId(),
-            event.getTrackingNumber() != null ? event.getTrackingNumber() : "TRK-EXP-001",
-            event.getNewStatus() != null ? event.getNewStatus().toString() : "IN_TRANSIT",
-            event.getRemarks() != null ? event.getRemarks() : "Package in transit with verified delivery partner"
-        );
+        log.info("Processing DeliveryStatusChangedEvent for order ID: {}, Status: {}, Customer ID: {}",
+                event.getOrderId(), event.getNewStatus(), event.getCustomerId());
 
-        notificationService.createAndSend("customer@eshoppingzone.com", null, subject, content, NotificationChannel.EMAIL, "DELIVERY_STATUS");
+        String recipientEmail = event.getCustomerId() != null
+                ? "customer" + event.getCustomerId() + "@eshoppingzone.com"
+                : "customer@eshoppingzone.com";
+
+        if (event.getNewStatus() == com.eshoppingzone.notification.enums.DeliveryStatus.DELIVERED) {
+            String subject = "🎉 Package Delivered Successfully! Order #" + event.getOrderId();
+            String agentName = event.getDeliveryAgentName() != null ? event.getDeliveryAgentName() : "Assigned Delivery Partner";
+            String recipientName = event.getRecipientName() != null ? event.getRecipientName() : "Valued Customer";
+            String shippingAddress = event.getShippingAddress() != null ? event.getShippingAddress() : "Registered Shipping Address";
+            String remarks = event.getRemarks() != null ? event.getRemarks() : "Package handed over directly to recipient";
+
+            String content = String.format(
+                "<div style='font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif; max-width: 620px; margin: 0 auto; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; color: #1e293b;'>" +
+                "<div style='background: #0f172a; color: #ffffff; padding: 22px 24px; display: flex; justify-content: space-between; align-items: center;'>" +
+                "<div><div style='font-size: 20px; font-weight: 900;'>EShopping<span style='color: #818cf8;'>Zone</span></div><div style='font-size: 11px; color: #94a3b8;'>Logistics & Courier Delivery Network</div></div>" +
+                "<div><span style='background: #dcfce7; color: #15803d; font-size: 11px; font-weight: 800; padding: 4px 12px; border-radius: 4px;'>PACKAGE DELIVERED</span></div>" +
+                "</div>" +
+                "<div style='padding: 24px;'>" +
+                "<div style='background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 18px 20px; text-align: center; margin-bottom: 20px;'>" +
+                "<div style='font-size: 32px; margin-bottom: 6px;'>📦 ✨</div>" +
+                "<div style='font-size: 16px; font-weight: 800; color: #15803d;'>Your Package Has Arrived!</div>" +
+                "<p style='font-size: 13px; color: #166534; margin: 6px 0 0;'>Hello <strong>%s</strong>, order <strong>#%d</strong> has been safely delivered by <strong>%s</strong>.</p>" +
+                "</div>" +
+                "<div style='background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px; margin-bottom: 18px; font-size: 12px;'>" +
+                "<table style='width: 100%%; border-collapse: collapse;'>" +
+                "<tr style='border-bottom: 1px solid #e2e8f0;'><td style='padding: 8px 0; color: #64748b;'>Order Reference:</td><td style='padding: 8px 0; text-align: right; font-weight: 700; color: #0f172a;'>#%d</td></tr>" +
+                "<tr style='border-bottom: 1px solid #e2e8f0;'><td style='padding: 8px 0; color: #64748b;'>Tracking / Waybill:</td><td style='padding: 8px 0; text-align: right; font-family: monospace; font-weight: 700; color: #0f172a;'>%s</td></tr>" +
+                "<tr style='border-bottom: 1px solid #e2e8f0;'><td style='padding: 8px 0; color: #64748b;'>Delivered By:</td><td style='padding: 8px 0; text-align: right; font-weight: 700; color: #0f172a;'>%s</td></tr>" +
+                "<tr style='border-bottom: 1px solid #e2e8f0;'><td style='padding: 8px 0; color: #64748b;'>Recipient Name:</td><td style='padding: 8px 0; text-align: right; font-weight: 700; color: #0f172a;'>%s</td></tr>" +
+                "<tr style='border-bottom: 1px solid #e2e8f0;'><td style='padding: 8px 0; color: #64748b;'>Delivered To:</td><td style='padding: 8px 0; text-align: right; color: #334155; font-size: 11px;'>%s</td></tr>" +
+                "<tr><td style='padding: 8px 0; color: #64748b;'>Handover Remarks:</td><td style='padding: 8px 0; text-align: right; color: #166534; font-weight: 600;'>%s</td></tr>" +
+                "</table>" +
+                "</div>" +
+                "<div style='background: #eef2ff; border: 1px solid #c7d2fe; border-radius: 8px; padding: 14px; margin-bottom: 20px; text-align: center;'>" +
+                "<div style='font-size: 13px; font-weight: 700; color: #3730a3; margin-bottom: 6px;'>How was your purchase?</div>" +
+                "<p style='font-size: 12px; color: #4338ca; margin: 0 0 12px;'>Share your thoughts and help other buyers in the EShopping Zone community.</p>" +
+                "<a href='http://localhost:4200/orders' style='background: #4f46e5; color: #ffffff; text-decoration: none; padding: 8px 20px; border-radius: 6px; font-size: 12px; font-weight: 700; display: inline-block;'>Write a Product Review →</a>" +
+                "</div>" +
+                "<div style='border-top: 1px solid #e2e8f0; padding-top: 12px; text-align: center; font-size: 11px; color: #64748b;'>" +
+                "EShopping Zone Logistics • support@eshoppingzone.com • Toll-free: 1800-ESZ-HELP" +
+                "</div>" +
+                "</div>" +
+                "</div>",
+                recipientName,
+                event.getOrderId(),
+                agentName,
+                event.getOrderId(),
+                event.getTrackingNumber() != null ? event.getTrackingNumber() : "TRK-EXP-001",
+                agentName,
+                recipientName,
+                shippingAddress,
+                remarks
+            );
+
+            notificationService.createAndSend(recipientEmail, event.getCustomerId(), subject, content, NotificationChannel.EMAIL, "ORDER_DELIVERED");
+        } else {
+            String subject = "Shipment Tracking Update: Order #" + event.getOrderId();
+            String content = String.format(
+                "<div style='font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif; max-width: 620px; margin: 0 auto; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; color: #1e293b;'>" +
+                "<div style='background: #0f172a; color: #ffffff; padding: 22px 24px; display: flex; justify-content: space-between; align-items: center;'>" +
+                "<div><div style='font-size: 20px; font-weight: 900;'>EShopping<span style='color: #818cf8;'>Zone</span></div><div style='font-size: 11px; color: #94a3b8;'>Live Logistics & Courier Dispatch Network</div></div>" +
+                "<div><span style='background: #e0f2fe; color: #0369a1; font-size: 11px; font-weight: 800; padding: 4px 10px; border-radius: 4px;'>%s</span></div>" +
+                "</div>" +
+                "<div style='padding: 24px;'>" +
+                "<div style='background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px; margin-bottom: 18px; font-size: 12px;'>" +
+                "<table style='width: 100%%; border-collapse: collapse;'>" +
+                "<tr style='border-bottom: 1px solid #e2e8f0;'><td style='padding: 6px 0; color: #64748b;'>Order Reference:</td><td style='padding: 6px 0; text-align: right; font-weight: 700; color: #0f172a;'>#%d</td></tr>" +
+                "<tr style='border-bottom: 1px solid #e2e8f0;'><td style='padding: 6px 0; color: #64748b;'>Waybill / Tracking No:</td><td style='padding: 6px 0; text-align: right; font-family: monospace; font-weight: 700; color: #0f172a;'>%s</td></tr>" +
+                "<tr style='border-bottom: 1px solid #e2e8f0;'><td style='padding: 6px 0; color: #64748b;'>Delivery Status:</td><td style='padding: 6px 0; text-align: right; font-weight: 700; color: #0369a1;'>%s</td></tr>" +
+                "<tr><td style='padding: 6px 0; color: #64748b;'>Logistics Remarks:</td><td style='padding: 6px 0; text-align: right; color: #475569;'>%s</td></tr>" +
+                "</table>" +
+                "</div>" +
+                "<div style='border-top: 1px solid #e2e8f0; padding-top: 12px; text-align: center; font-size: 11px; color: #64748b;'>" +
+                "EShopping Zone Logistics • tracking@eshoppingzone.com" +
+                "</div>" +
+                "</div>" +
+                "</div>",
+                event.getNewStatus() != null ? event.getNewStatus().toString() : "IN_TRANSIT",
+                event.getOrderId(),
+                event.getTrackingNumber() != null ? event.getTrackingNumber() : "TRK-EXP-001",
+                event.getNewStatus() != null ? event.getNewStatus().toString() : "IN_TRANSIT",
+                event.getRemarks() != null ? event.getRemarks() : "Package status updated with verified delivery partner"
+            );
+
+            notificationService.createAndSend(recipientEmail, event.getCustomerId(), subject, content, NotificationChannel.EMAIL, "DELIVERY_STATUS");
+        }
     }
 
     @RabbitListener(queues = RabbitMQConfig.INVENTORY_QUEUE)

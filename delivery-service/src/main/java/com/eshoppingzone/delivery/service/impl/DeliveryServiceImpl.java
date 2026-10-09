@@ -217,15 +217,20 @@ public class DeliveryServiceImpl implements DeliveryService {
                     .timestamp(Instant.now())
                     .deliveryId(delivery.getId())
                     .orderId(delivery.getOrderId())
+                    .customerId(delivery.getCustomerId())
                     .trackingNumber(delivery.getTrackingNumber())
                     .previousStatus(prev)
                     .newStatus(next)
                     .deliveryAgentId(delivery.getDeliveryAgentId())
+                    .deliveryAgentName(delivery.getDeliveryAgentName())
+                    .recipientName(delivery.getRecipientName())
+                    .recipientPhone(delivery.getRecipientPhone())
+                    .shippingAddress(delivery.getShippingAddressSnapshot())
                     .remarks(remarks)
                     .build();
 
             rabbitTemplate.convertAndSend(exchange, "delivery.status.changed", event);
-            log.info("Published DeliveryStatusChangedEvent for delivery ID: {}", delivery.getId());
+            log.info("Published DeliveryStatusChangedEvent for delivery ID: {}, newStatus: {}", delivery.getId(), next);
         } catch (Exception e) {
             log.error("Failed to publish DeliveryStatusChangedEvent: {}", e.getMessage());
         }
@@ -250,9 +255,37 @@ public class DeliveryServiceImpl implements DeliveryService {
     @Override
     @Transactional(readOnly = true)
     public DeliveryDto getDeliveryByTrackingNumber(String trackingNumber) {
-        return deliveryRepository.findByTrackingNumber(trackingNumber)
-                .map(this::mapToDto)
-                .orElseThrow(() -> new ResourceNotFoundException("Delivery not found with tracking number: " + trackingNumber));
+        if (trackingNumber == null || trackingNumber.isBlank()) {
+            throw new BadRequestException("Tracking number is required");
+        }
+
+        // 1. Direct tracking number match
+        var opt = deliveryRepository.findByTrackingNumber(trackingNumber.trim());
+        if (opt.isPresent()) {
+            return mapToDto(opt.get());
+        }
+
+        // 2. TRK-ESHOP-{orderId} lookup
+        if (trackingNumber.toUpperCase().startsWith("TRK-ESHOP-")) {
+            String idStr = trackingNumber.substring(10);
+            try {
+                Long orderId = Long.parseLong(idStr);
+                return deliveryRepository.findByOrderId(orderId)
+                        .map(this::mapToDto)
+                        .orElseThrow(() -> new ResourceNotFoundException("Delivery not found for order reference: " + trackingNumber));
+            } catch (NumberFormatException ignored) {}
+        }
+
+        // 3. Raw order ID lookup fallback
+        try {
+            Long orderId = Long.parseLong(trackingNumber.trim());
+            var byOrder = deliveryRepository.findByOrderId(orderId);
+            if (byOrder.isPresent()) {
+                return mapToDto(byOrder.get());
+            }
+        } catch (NumberFormatException ignored) {}
+
+        throw new ResourceNotFoundException("Delivery not found with tracking number: " + trackingNumber);
     }
 
     @Override

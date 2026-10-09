@@ -15,9 +15,14 @@ import lombok.experimental.SuperBuilder;
 public class DeliveryStatusChangedEvent extends BaseEvent {
     private Long deliveryId;
     private Long orderId;
+    private Long customerId;
     private String trackingNumber;
     private DeliveryStatus previousStatus;
     private DeliveryStatus newStatus;
     private Long deliveryAgentId;
+    private String deliveryAgentName;
+    private String recipientName;
+    private String recipientPhone;
+    private String shippingAddress;
     private String remarks;
 }
